@@ -5,8 +5,10 @@ Una plataforma educativa moderna que integra un frontend desarrollado en Astro c
 ## 🚀 Características
 
 - **Frontend moderno**: Interfaz desarrollada en Astro para mejor rendimiento
+- **Widget de autenticación integrado**: Widget flotante que muestra estado de sesión en tiempo real
 - **LMS robusto**: Moodle 4.3.3 para gestión de aprendizaje
 - **Autenticación integrada**: Sistema de autenticación unificado entre frontend y Moodle
+- **UX mejorada**: Experiencia de usuario fluida sin redirecciones innecesarias
 - **API RESTful**: Endpoints para verificación de sesiones y gestión de usuarios
 - **Arquitectura en contenedores**: Docker Compose para fácil despliegue
 - **Proxy inteligente**: Nginx para enrutamiento y balanceo
@@ -112,6 +114,34 @@ curl -b "MoodleSession=..." http://localhost:4324/api/check-session
 
 # Obtener información del usuario
 curl -b "MoodleSession=..." http://localhost:4324/api/user
+
+# Cerrar sesión
+curl -X POST http://localhost:4324/api/logout
+```
+
+**Respuestas de ejemplo:**
+
+```json
+// GET /api/check-session (usuario autenticado)
+{
+  "loggedIn": true,
+  "user": {
+    "id": 2,
+    "username": "user",
+    "name": "Usuario Demo",
+    "email": "user@example.com"
+  },
+  "sessionInfo": {
+    "created": "2025-07-30T17:30:00.000Z",
+    "lastActivity": "2025-07-30T17:55:00.000Z"
+  }
+}
+
+// GET /api/check-session (usuario no autenticado)
+{
+  "loggedIn": false,
+  "message": "No session cookie found"
+}
 ```
 
 ### Credenciales de Acceso
@@ -140,6 +170,73 @@ curl -b "MoodleSession=..." http://localhost:4324/api/user
 ├── moodle-extra-config   # Configuración adicional para Moodle (wwwroot, proxy)
 └── nginx                 # Configuración personalizada de Nginx
 ```
+
+## 🎯 Widget de Autenticación Integrado
+
+### Descripción
+
+La plataforma incluye un **widget de autenticación flotante** en la página principal que proporciona una experiencia de usuario mejorada y visibilidad en tiempo real del estado de autenticación.
+
+### Características del Widget
+
+- **📍 Ubicación**: Esquina superior derecha de la página principal
+- **🎨 Diseño**: Widget flotante con gradientes modernos y animaciones suaves
+- **📱 Responsive**: Se adapta automáticamente a dispositivos móviles y desktop
+- **⚡ Tiempo real**: Verifica automáticamente el estado de sesión al cargar la página
+
+### Estados del Widget
+
+#### 🔄 Estado de Carga
+```
+┌─────────────────────┐
+│  Verificando        │
+│  sesión...          │
+└─────────────────────┘
+```
+
+#### 🔐 Usuario No Autenticado
+```
+┌─────────────────────┐
+│  Iniciar Sesión     │
+│  en Moodle          │
+│                     │
+│  [Verificar Sesión] │
+└─────────────────────┘
+```
+
+#### ✅ Usuario Autenticado
+```
+┌─────────────────────┐
+│  👤 J               │
+│  Juan Pérez         │
+│  juan@example.com   │
+│                     │
+│  [Cerrar Sesión]    │
+└─────────────────────┘
+```
+
+### Flujo de Usuario
+
+1. **Llegada a la página**: Widget automáticamente verifica estado de sesión
+2. **Sin autenticar**: Muestra botón para ir a Moodle (`/learning/login/`)
+3. **Después del login**: Usuario regresa y hace click en "Verificar Sesión"
+4. **Autenticado**: Widget muestra avatar, nombre, email y opción de logout
+5. **Logout**: Click en "Cerrar Sesión" cierra la sesión en el backend
+
+### Implementación Técnica
+
+- **Frontend**: JavaScript integrado en `astro/src/pages/index.astro`
+- **API Integration**: Utiliza endpoints `/api/check-session` y `/api/logout`
+- **Responsive CSS**: Estilos adaptativos con gradientes y animaciones
+- **Error Handling**: Manejo robusto de errores con logs en consola
+
+### Beneficios UX
+
+- ✅ **Visibilidad clara** del estado de autenticación
+- ✅ **No hay redirecciones innecesarias** al verificar sesión
+- ✅ **Experiencia fluida** entre frontend y Moodle
+- ✅ **Información contextual** siempre visible
+- ✅ **Logout conveniente** sin perder contexto de navegación
 
 ## 🔐 Sistema de Autenticación
 

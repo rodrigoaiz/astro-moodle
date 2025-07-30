@@ -49,7 +49,7 @@ Widget actualiza y muestra información del usuario
 
 ### Servicios Docker Integrados:
 - **astro** (puerto 3000) - Frontend con widget integrado
-- **auth** (puerto 3000) - API de autenticación 
+- **auth** (puerto 3000) - API de autenticación
 - **nginx** (puerto 80) - Proxy reverso con routing
 
 ### Configuración de Proxy (nginx):
