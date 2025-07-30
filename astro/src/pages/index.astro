@@ -146,6 +146,170 @@ const description = "Sistema integrado de aprendizaje con Astro y Moodle";
       flex-wrap: wrap;
     }
 
+    /* Estilos para el widget de login */
+    .auth-widget {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      min-width: 280px;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .auth-widget.loading {
+      opacity: 0.7;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .login-form input {
+      padding: 0.75rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .login-form input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .login-form button {
+      padding: 0.75rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .login-form button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .login-form button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .login-form .btn {
+      display: inline-block;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 0.75rem;
+    }
+
+    .login-form .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+    }
+
+    .login-form .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      color: white;
+    }
+
+    .login-form .btn-secondary {
+      background: #f8f9fa;
+      color: #495057;
+      border: 1px solid #dee2e6;
+    }
+
+    .login-form .btn-secondary:hover {
+      background: #e9ecef;
+      border-color: #adb5bd;
+      transform: translateY(-1px);
+    }
+
+    .user-info {
+      text-align: center;
+    }
+
+    .user-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      margin: 0 auto 1rem;
+      font-weight: bold;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .user-email {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    .logout-btn {
+      width: 100%;
+      padding: 0.5rem;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: #c82333;
+    }
+
+    .error-message {
+      color: #dc3545;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    .success-message {
+      color: #28a745;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .auth-widget {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin: 2rem auto;
+        width: 90%;
+        max-width: 300px;
+      }
+
     @media (max-width: 768px) {
       .hero h1 {
         font-size: 2.5rem;
@@ -163,6 +327,36 @@ const description = "Sistema integrado de aprendizaje con Astro y Moodle";
   </style>
 </head>
 <body>
+  <!-- Widget de Autenticación -->
+  <div class="auth-widget" id="authWidget">
+    <!-- Login Form (visible cuando no está logueado) -->
+    <div class="login-form" id="loginForm" style="display: none;">
+      <h3 style="margin-bottom: 1rem; text-align: center; color: #333;">Acceso al Sistema</h3>
+      <p style="text-align: center; margin-bottom: 1rem; color: #666; font-size: 0.9rem;">
+        Para acceder al sistema, inicia sesión en Moodle
+      </p>
+      <a href="/learning/login/" class="btn btn-primary" style="width: 100%; text-align: center; text-decoration: none; display: inline-block; margin-bottom: 1rem;">
+        Iniciar Sesión en Moodle
+      </a>
+      <button type="button" id="checkSessionBtn" class="btn btn-secondary" style="width: 100%;">
+        Verificar Sesión
+      </button>
+    </div>
+
+    <!-- User Info (visible cuando está logueado) -->
+    <div class="user-info" id="userInfo" style="display: none;">
+      <div class="user-avatar" id="userAvatar">U</div>
+      <div class="user-name" id="userName">Usuario</div>
+      <div class="user-email" id="userEmail">usuario@email.com</div>
+      <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
+    </div>
+
+    <!-- Loading state -->
+    <div id="loadingState" style="text-align: center;">
+      <p>Verificando sesión...</p>
+    </div>
+  </div>
+
   <div class="container">
     <!-- Hero Section -->
     <section class="hero">
@@ -208,26 +402,93 @@ const description = "Sistema integrado de aprendizaje con Astro y Moodle";
   </div>
 
   <script>
-    // Agregar interactividad básica
+    // TypeScript-compatible JavaScript
     document.addEventListener('DOMContentLoaded', function() {
-      // Animación suave para los cards
-      const cards = document.querySelectorAll('.feature-card');
 
+      // Authentication Widget Functions
+      async function checkSession() {
+        try {
+          const response = await fetch('/api/check-session');
+          if (response.ok) {
+            const userData = await response.json();
+            if (userData.loggedIn) {
+              showUserInfo(userData);
+            } else {
+              showLoginForm();
+            }
+          } else {
+            showLoginForm();
+          }
+        } catch (error) {
+          console.error('Error checking session:', error);
+          showLoginForm();
+        }
+        const loadingState = document.getElementById('loadingState');
+        if (loadingState) loadingState.style.display = 'none';
+      }
+
+      function showLoginForm() {
+        const loginForm = document.getElementById('loginForm');
+        const userInfo = document.getElementById('userInfo');
+        if (loginForm) loginForm.style.display = 'block';
+        if (userInfo) userInfo.style.display = 'none';
+      }
+
+      function showUserInfo(userData) {
+        const loginForm = document.getElementById('loginForm');
+        const userInfo = document.getElementById('userInfo');
+        if (loginForm) loginForm.style.display = 'none';
+        if (userInfo) userInfo.style.display = 'block';
+
+        // Update user info
+        const userNameEl = document.getElementById('userName');
+        const userEmailEl = document.getElementById('userEmail');
+        const userAvatarEl = document.getElementById('userAvatar');
+
+        if (userNameEl) userNameEl.textContent = userData.user.name;
+        if (userEmailEl) userEmailEl.textContent = userData.user.email;
+        if (userAvatarEl) userAvatarEl.textContent = userData.user.name.charAt(0).toUpperCase();
+      }
+
+      async function logout() {
+        try {
+          const response = await fetch('/api/logout', {
+            method: 'POST',
+          });
+
+          if (response.ok) {
+            showLoginForm();
+          }
+        } catch (error) {
+          console.error('Logout error:', error);
+        }
+      }      // Card animation with proper TypeScript types
+      const cards = document.querySelectorAll('.feature-card');
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
+            const element = entry.target as HTMLElement;
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
           }
         });
       });
 
       cards.forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        const element = card as HTMLElement;
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         observer.observe(card);
       });
+
+      // Event listeners for authentication
+      const checkSessionBtn = document.getElementById('checkSessionBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      if (checkSessionBtn) checkSessionBtn.addEventListener('click', checkSession);
+      if (logoutBtn) logoutBtn.addEventListener('click', logout);      // Initialize authentication check
+      checkSession();
     });
   </script>
 </body>

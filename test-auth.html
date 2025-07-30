@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Authentication Widget</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .test-section {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #e9ecef;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Authentication Widget</h1>
+    
+    <div class="test-section">
+        <h3>1. Test Check Session Endpoint</h3>
+        <button onclick="testCheckSession()">Check Session</button>
+        <div id="checkSessionResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Test Health Endpoint</h3>
+        <button onclick="testHealth()">Check Health</button>
+        <div id="healthResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Test User Endpoint</h3>
+        <button onclick="testUser()">Get User Info</button>
+        <div id="userResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Quick Links</h3>
+        <a href="http://localhost:4324/" target="_blank">
+            <button>Open Main Page</button>
+        </a>
+        <a href="http://localhost:4324/learning/login/" target="_blank">
+            <button>Login to Moodle</button>
+        </a>
+    </div>
+
+    <script>
+        async function testCheckSession() {
+            const resultDiv = document.getElementById('checkSessionResult');
+            try {
+                const response = await fetch('/api/check-session');
+                const data = await response.json();
+                resultDiv.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function testHealth() {
+            const resultDiv = document.getElementById('healthResult');
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                resultDiv.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function testUser() {
+            const resultDiv = document.getElementById('userResult');
+            try {
+                const response = await fetch('/api/user');
+                const data = await response.json();
+                resultDiv.textContent = `Status: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
