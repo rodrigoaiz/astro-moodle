@@ -78,7 +78,32 @@ Este proyecto cubre el diseño, desarrollo, implementación y despliegue de la i
 
 ## 7. Hitos
 
-* **Hito 1:** Infraestructura base Dockerizada y funcional.
-* **Hito 2:** Moodle instalado, configurado y accesible en `/learning` con estilos.
-* **Hito 3:** Frontend Astro accesible en `/` y conectado al servicio de autenticación.
-* **Hito 4:** Documentación del proyecto (README) y requisitos (PRD) completada.
+* **Hito 1:** ✅ **COMPLETADO** - Infraestructura base Dockerizada y funcional.
+* **Hito 2:** ✅ **COMPLETADO** - Moodle instalado, configurado y accesible en `/learning` con estilos.
+  * ✅ Moodle instalado y funcionando
+  * ✅ Accesible en `/learning`
+  * ✅ Estilos y assets funcionando correctamente
+* **Hito 3:** ⏳ **PENDIENTE** - Frontend Astro accesible en `/` y conectado al servicio de autenticación.
+* **Hito 4:** ⏳ **PENDIENTE** - Documentación del proyecto (README) y requisitos (PRD) completada.
+
+## 8. Estado Actual del Proyecto
+
+### ✅ Completado
+* Infraestructura Docker completa funcionando
+* Todos los servicios levantados y comunicándose
+* Base de datos MariaDB configurada y saludable
+* Moodle 4.3.3 instalado exitosamente
+* Proxy inverso Nginx funcionando
+* Enrutamiento configurado (`/` → astro, `/learning` → moodle, `/api` → auth)
+* Adminer accesible en puerto 4325
+* **Moodle completamente funcional en `/learning` con estilos y assets**
+* **Configuración de proxy nginx para assets de Moodle**
+
+### 🚧 En Proceso
+* Desarrollo del frontend Astro
+* Configuración de autenticación unificada
+
+### ⏳ Pendiente
+* Integración completa del frontend Astro con el backend
+* Pruebas de integración completas
+* Documentación final

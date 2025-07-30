@@ -38,9 +38,11 @@ services:
       - MOODLE_PASSWORD=admin123
       - MOODLE_EMAIL=admin@example.com
       - MOODLE_SITE_NAME=Moodle Site
+      - MOODLE_EXTRA_CONFIG_FILE=/bitnami/moodle/conf/moodle_settings.php
 
     volumes:
       - moodle_data:/bitnami/moodle
+      - ./moodle-extra-config/moodle_settings.php:/bitnami/moodle/conf/moodle_settings.php:ro
     expose:
       - "8080"
     depends_on:
