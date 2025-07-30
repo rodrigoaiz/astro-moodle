@@ -1,0 +1,29 @@
+# build output
+dist/
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+
+# macOS-specific files
+.DS_Store
+
+# Word temporary files
+~$*.*
+*.psd
+# Ignore all dist, node_modules, and .astro folders recursively
+**/dist/
+**/node_modules/
+**/.astro/
+moodle/*
+moodledata/*
