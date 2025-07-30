@@ -1,56 +1,32 @@
+// auth/server.js
 const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 
 const app = express();
-
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Debug: Log all requests
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  next();
-});
-
-// Root endpoint for testing
-app.get('/', (req, res) => {
-  res.json({ message: 'Auth service is running' });
-});
-
-// Variable para almacenar la conexión a la base de datos
 let db = null;
 
-// Configuración de la base de datos
-const dbConfig = {
-  host: process.env.DB_HOST || 'db',
-  user: process.env.DB_USER || 'moodle',
-  password: process.env.DB_PASS || 'moodle_pass',
-  database: process.env.DB_NAME || 'moodle',
-  port: process.env.DB_PORT || 3306
-};
-
-// Función para conectar a la base de datos con reintentos
 async function connectDB() {
   const maxRetries = 10;
   let attempts = 0;
 
   while (attempts < maxRetries) {
-    attempts++;
-
     try {
-      console.log(`🔄 Intento ${attempts} de conexión a la base de datos...`);
+      db = await mysql.createConnection({
+        host: process.env.DB_HOST || 'db',
+        user: process.env.DB_USER || 'moodle',
+        password: process.env.DB_PASS || 'moodle_pass',
+        database: process.env.DB_NAME || 'moodle',
+        port: process.env.DB_PORT || 3306
+      });
 
-      db = await mysql.createConnection(dbConfig);
-
-      // Probar la conexión
-      await db.execute('SELECT 1');
-
-      console.log('✅ Auth: Conectado a la DB de Moodle');
+      console.log('✅ Conectado a la base de datos MySQL');
       return;
-
     } catch (error) {
+      attempts++;
       console.log(`❌ Intento ${attempts}/${maxRetries} fallido:`, error.message);
 
       if (attempts >= maxRetries) {

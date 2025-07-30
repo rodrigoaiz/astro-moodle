@@ -1,37 +1,105 @@
-# Astro + Moodle Docker Stack
+# Astro + Moodle Integration Platform
 
-Este proyecto proporciona un entorno Dockerizado para ejecutar un sitio web moderno con:
+Una plataforma educativa moderna que integra un frontend desarrollado en Astro con Moodle LMS, utilizando Docker para una implementación robusta y escalable.
 
-* **Frontend:** [Astro](https://astro.build/) (sitio estático o con SSR).
-* **Backend LMS:** [Moodle](https://moodle.org/) para gestión de aprendizaje.
-* **Autenticación:** Un servicio Node.js simple para verificar sesiones de Moodle.
-* **Base de Datos:** MariaDB administrada por Bitnami.
-* **Proxy Inverso:** Nginx para enrutar solicitudes y exponer servicios en puertos específicos.
-* **Herramienta de Administración:** Adminer para gestionar la base de datos.
+## 🚀 Características
+
+- **Frontend moderno**: Interfaz desarrollada en Astro para mejor rendimiento
+- **LMS robusto**: Moodle 4.3.3 para gestión de aprendizaje
+- **Arquitectura en contenedores**: Docker Compose para fácil despliegue
+- **Proxy inteligente**: Nginx para enrutamiento y balanceo
+- **Base de datos optimizada**: MariaDB para almacenamiento confiable
+- **Administración web**: Adminer para gestión de base de datos
+
+## 📋 Requisitos Previos
+
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+- Puerto 4324 disponible (configurable)
+- Puerto 4325 disponible (configurable)
 
 Ideal para integrar un sitio institucional moderno con un LMS sin necesidad de configuraciones complejas manuales.
 
-## 🚀 Inicio Rápido
+## 🏗️ Arquitectura
 
-1. **Clona el repositorio:**
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Nginx Proxy   │────│   Astro App     │    │   Auth Service  │
+│   Port: 4324    │    │   Port: 3000    │    │   Port: 3000    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         ├───────────────────────┼───────────────────────┼──────────
+         │              Docker Network (172.18.0.0/16)  │
+         ├───────────────────────┼───────────────────────┘
+         ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Moodle LMS    │    │   MariaDB       │    │   Adminer       │
+│   Port: 8080    │    │   Port: 3306    │    │   Port: 4325    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
 
-    ```bash
-    git clone <tu-repo-url>
-    cd <nombre-del-repo>
-    ```
+## 🚀 Instalación y Configuración
 
-2. **Construye y ejecuta los contenedores:**
+### 1. Clonar el repositorio
 
-    ```bash
-    docker compose up -d
-    ```
+```bash
+git clone <repository-url>
+cd astro-moodle
+```
 
-3. **Accede a los servicios:**
-    * **Sitio Astro:** `http://<tu-ip>:4324`
-    * **Moodle:** `http://<tu-ip>:4324/learning`
-    * **Adminer (DB):** `http://<tu-ip>:4325`
+### 2. Configurar variables de entorno (opcional)
 
-4. **Instala Moodle:** En tu primer acceso a `http://<tu-ip>:4324/learning`, sigue el instalador de Moodle para configurar el sitio y crear el usuario administrador.
+```bash
+# Copiar archivo de ejemplo si existe
+cp .env.example .env
+
+# Editar configuración
+nano .env
+```
+
+Variables disponibles:
+- `HTTP_PORT=4324` - Puerto principal de la aplicación
+- `ADMIN_PORT=4325` - Puerto para Adminer
+
+### 3. Construir e iniciar los servicios
+
+```bash
+# Construir e iniciar todos los servicios
+docker compose up -d
+
+# Verificar que todos los contenedores estén funcionando
+docker compose ps
+```
+
+### 4. Verificar la instalación
+
+La instalación estará completa cuando todos los servicios muestren estado "healthy" o "running":
+
+```bash
+docker compose ps
+```
+
+## 🌐 Acceso a la Plataforma
+
+### URLs Principales
+
+- **Frontend Principal**: `http://localhost:4324/`
+- **Moodle LMS**: `http://localhost:4324/learning/`
+- **API de Autenticación**: `http://localhost:4324/api/`
+- **Adminer (Base de Datos)**: `http://localhost:4325/`
+
+### Credenciales de Acceso
+
+**Moodle Administrador:**
+- Usuario: `admin`
+- Contraseña: `admin123`
+
+**Base de Datos (Adminer):**
+- Sistema: `MySQL`
+- Servidor: `db`
+- Usuario: `moodle`
+- Contraseña: `moodle_pass`
+- Base de datos: `moodle`
 
 ## 📁 Estructura del Proyecto
 

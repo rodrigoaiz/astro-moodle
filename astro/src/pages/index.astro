@@ -1,11 +1,234 @@
 ---
-// Nada de fetch al backend por ahora
+// Frontend principal del sistema educativo
+const title = "Plataforma Educativa";
+const description = "Sistema integrado de aprendizaje con Astro y Moodle";
 ---
-<html>
-  <head><title>Inicio</title></head>
-  <body>
-    <h1>🎓 Bienvenido</h1>
-    <p>Frontend con <strong>Astro</strong></p>
-    <p><a href="/learning">Ir a Moodle</a></p>
-  </body>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  <meta name="description" content={description}>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      margin-bottom: 3rem;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    .feature-card p {
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #48CAE4, #0077BE);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: 0 10px 20px rgba(72, 202, 228, 0.4);
+    }
+
+    .cta-section {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 3rem 2rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .cta-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    .cta-section p {
+      font-size: 1.2rem;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .button-group {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1>🎓 Plataforma Educativa</h1>
+      <p>Sistema integrado de aprendizaje moderno con tecnologías avanzadas</p>
+      <p>Astro + Moodle + Docker para una experiencia educativa completa</p>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>Frontend Moderno</h3>
+        <p>Interfaz rápida y responsive desarrollada en Astro para una experiencia de usuario excepcional</p>
+        <a href="#" class="btn">Explorar Frontend</a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>LMS Completo</h3>
+        <p>Moodle 4.3.3 integrado con todas las funcionalidades para gestión de cursos y estudiantes</p>
+        <a href="/learning" class="btn btn-secondary">Acceder a Moodle</a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>Autenticación Unificada</h3>
+        <p>Sistema de autenticación integrado que conecta el frontend con Moodle de manera transparente</p>
+        <a href="/api" class="btn">Ver API</a>
+      </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+      <h2>¿Listo para empezar?</h2>
+      <p>Accede al sistema de gestión de aprendizaje y comienza tu experiencia educativa</p>
+
+      <div class="button-group">
+        <a href="/learning" class="btn btn-secondary">Entrar a Moodle</a>
+        <a href="/learning/login/index.php" class="btn">Iniciar Sesión</a>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Agregar interactividad básica
+    document.addEventListener('DOMContentLoaded', function() {
+      // Animación suave para los cards
+      const cards = document.querySelectorAll('.feature-card');
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      });
+
+      cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+      });
+    });
+  </script>
+</body>
 </html>

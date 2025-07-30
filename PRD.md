@@ -80,15 +80,18 @@ Este proyecto cubre el diseño, desarrollo, implementación y despliegue de la i
 
 * **Hito 1:** ✅ **COMPLETADO** - Infraestructura base Dockerizada y funcional.
 * **Hito 2:** ✅ **COMPLETADO** - Moodle instalado, configurado y accesible en `/learning` con estilos.
-  * ✅ Moodle instalado y funcionando
-  * ✅ Accesible en `/learning`
-  * ✅ Estilos y assets funcionando correctamente
-* **Hito 3:** ⏳ **PENDIENTE** - Frontend Astro accesible en `/` y conectado al servicio de autenticación.
+  * ✅ Moodle 4.3.3 instalado y funcionando
+  * ✅ Accesible en `/learning` con navegación completa
+  * ✅ Estilos, CSS, JavaScript y assets funcionando correctamente
+  * ✅ Arquitectura de proxy nginx optimizada
+  * ✅ Credenciales: admin/admin123
+* **Hito 3:** 🚧 **EN PROGRESO** - Frontend Astro accesible en `/` y conectado al servicio de autenticación.
 * **Hito 4:** ⏳ **PENDIENTE** - Documentación del proyecto (README) y requisitos (PRD) completada.
 
 ## 8. Estado Actual del Proyecto
 
 ### ✅ Completado
+
 * Infraestructura Docker completa funcionando
 * Todos los servicios levantados y comunicándose
 * Base de datos MariaDB configurada y saludable
@@ -98,12 +101,51 @@ Este proyecto cubre el diseño, desarrollo, implementación y despliegue de la i
 * Adminer accesible en puerto 4325
 * **Moodle completamente funcional en `/learning` con estilos y assets**
 * **Configuración de proxy nginx para assets de Moodle**
+* **Arquitectura híbrida robusta: nginx captura URLs transparentemente**
 
 ### 🚧 En Proceso
+
 * Desarrollo del frontend Astro
 * Configuración de autenticación unificada
 
 ### ⏳ Pendiente
+
 * Integración completa del frontend Astro con el backend
 * Pruebas de integración completas
 * Documentación final
+
+## 9. Arquitectura Final Implementada
+
+### Infraestructura de Contenedores
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Nginx Proxy   │────│   Astro App     │    │   Auth Service  │
+│   Port: 4324    │    │   Port: 3000    │    │   Port: 3000    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         ├───────────────────────┼───────────────────────┼──────────
+         │              Docker Network (172.18.0.0/16)  │
+         ├───────────────────────┼───────────────────────┘
+         ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Moodle LMS    │    │   MariaDB       │    │   Adminer       │
+│   Port: 8080    │    │   Port: 3306    │    │   Port: 4325    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+### Enrutamiento Nginx
+* **`/`** → Frontend Astro (Puerto 3000)
+* **`/learning/`** → Moodle LMS (Puerto 8080)
+* **`/api/`** → Servicio de Autenticación (Puerto 3000)
+* **Assets Moodle**: `/theme/`, `/lib/`, `/pix/`, `/login/`, `/admin/`, etc. → Moodle LMS
+
+### URLs Operativas
+* **Frontend Principal**: http://132.248.218.76:4324/
+* **Moodle LMS**: http://132.248.218.76:4324/learning/
+* **API Auth**: http://132.248.218.76:4324/api/
+* **Adminer DB**: http://132.248.218.76:4325/
+
+### Credenciales de Acceso
+* **Moodle Admin**: `admin` / `admin123`
+* **Base de Datos**: `moodle` / `moodle_pass`
+* **Root DB**: `root` / `root_pass`
