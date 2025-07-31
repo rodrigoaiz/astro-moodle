@@ -1,15 +1,31 @@
 # astro/Dockerfile
-FROM node:18-alpine
+# Multi-stage build para optimizar imagen de producción
+FROM node:20-alpine AS build
 
 WORKDIR /app
+
+# Copiar package.json Y package-lock.json para aprovechar cache de Docker
 COPY package*.json ./
-RUN npm install
 
+# Usar npm ci para instalación exacta y reproducible
+RUN npm ci
+
+# Copiar código fuente
 COPY . .
-RUN npm run build  # Construye el sitio estático
 
-# Sirve con un servidor simple (nginx o http-server)
+# Construir aplicación
+RUN npm run build
+
+# Etapa de producción
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Instalar solo el servidor HTTP
 RUN npm install -g http-server
+
+# Copiar solo los archivos construidos desde la etapa de build
+COPY --from=build /app/dist ./dist
 
 EXPOSE 3000
 
