@@ -1,0 +1,284 @@
+---
+// Widget reutilizable para mostrar contenido de Moodle según autenticación
+export interface Props {
+  src?: string;
+  title?: string;
+  description?: string;
+  height?: string;
+  showInHero?: boolean;
+  fallbackMessage?: string;
+}
+
+const {
+  src = "",
+  title = "Contenido de Moodle",
+  description = "Accede a tu contenido educativo",
+  height = "h-64 md:h-96",
+  showInHero = false,
+  fallbackMessage = "Inicia sesión para ver este contenido"
+} = Astro.props;
+
+// Generar ID único para este widget
+const widgetId = `widget-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div class={`moodle-widget w-full ${showInHero ? 'mb-8' : ''}`} data-src={src} data-title={title} data-widget-id={widgetId}>
+  <!-- Estado inicial: verificando autenticación -->
+  <div id={`${widgetId}-loading`} class={`w-full ${height} rounded-lg card p-8 flex items-center justify-center`}>
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+      <p class="text-white/70">Cargando contenido...</p>
+    </div>
+  </div>
+
+  <!-- Estado: usuario no autenticado -->
+  <div id={`${widgetId}-unauthorized`} class={`hidden w-full ${height} rounded-lg card p-8 flex items-center justify-center`}>
+    <div class="text-center max-w-lg">
+      <div class="text-6xl mb-6">🎓</div>
+      <h3 class="text-2xl font-bold text-white mb-4">{title}</h3>
+      <p class="text-white/70 mb-6 leading-relaxed">
+        {fallbackMessage}. {description && `${description}.`}
+      </p>
+      <div class="space-y-3">
+        <a href="/learning/login/index.php" class="btn btn-accent w-full sm:w-auto">
+          🚀 Acceder a Moodle
+        </a>
+        <p class="text-xs text-white/50">
+          Una vez que inicies sesión, este contenido se mostrará automáticamente
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado: usuario autenticado - mostrar iframe -->
+  <div id={`${widgetId}-authorized`} class="hidden w-full">
+    <div class="relative group">
+      <!-- Header del widget -->
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-white">{title}</h3>
+          {description && <p class="text-sm text-white/60">{description}</p>}
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1 bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded-full">
+            ✅ Conectado
+          </span>
+          <button class="refresh-widget-btn text-white/60 hover:text-white p-1 rounded" title="Actualizar contenido">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Iframe container -->
+      <div class="relative overflow-hidden rounded-lg border border-white/10 shadow-xl">
+        <iframe
+          id={`${widgetId}-iframe`}
+          src=""
+          class={`w-full ${height} transition-opacity duration-300`}
+          allowfullscreen
+          title={title}>
+        </iframe>
+
+        <!-- Loading overlay para el iframe -->
+        <div id={`${widgetId}-overlay`} class="absolute inset-0 bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-sm flex items-center justify-center">
+          <div class="text-center text-white">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+            <p>Cargando {title.toLowerCase()}...</p>
+            <p class="text-xs text-white/60 mt-2">Esto puede tomar unos segundos</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicador de actualización -->
+      <div id={`${widgetId}-refresh`} class="hidden absolute top-4 left-4 bg-blue-500/80 text-white text-xs px-2 py-1 rounded">
+        Actualizando...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script que se ejecuta como una isla de Astro -->
+<script>
+  class MoodleWidget {
+    constructor(widgetElement) {
+      this.element = widgetElement;
+      this.widgetId = widgetElement.dataset.widgetId;
+      this.config = {
+        src: widgetElement.dataset.src,
+        title: widgetElement.dataset.title
+      };
+
+      // Elementos del DOM usando IDs únicos
+      this.loadingEl = this.element.querySelector(`#${this.widgetId}-loading`);
+      this.unauthorizedEl = this.element.querySelector(`#${this.widgetId}-unauthorized`);
+      this.authorizedEl = this.element.querySelector(`#${this.widgetId}-authorized`);
+      this.iframe = this.element.querySelector(`#${this.widgetId}-iframe`);
+      this.iframeOverlay = this.element.querySelector(`#${this.widgetId}-overlay`);
+      this.refreshIndicator = this.element.querySelector(`#${this.widgetId}-refresh`);
+
+      this.isAuthenticated = false;
+      this.checkInterval = null;
+
+      this.init();
+    }
+
+    async init() {
+      await this.checkAuthentication();
+      this.setupEventListeners();
+
+      // Verificar autenticación cada 30 segundos si no está autenticado
+      if (!this.isAuthenticated) {
+        this.checkInterval = setInterval(() => {
+          this.checkAuthentication();
+        }, 30000);
+      }
+    }
+
+    async checkAuthentication() {
+      try {
+        // Verificar sistema de auth local
+        const authResponse = await fetch('/api/auth', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
+        });
+
+        if (authResponse.ok) {
+          const authData = await authResponse.json();
+          if (authData.authenticated && authData.user) {
+            this.showAuthorizedContent();
+            return;
+          }
+        }
+
+        // Verificar sesión de Moodle
+        const sessionResponse = await fetch('/api/check-session', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }
+        });
+
+        if (sessionResponse.ok) {
+          const sessionData = await sessionResponse.json();
+          if (sessionData.loggedIn && sessionData.user) {
+            this.showAuthorizedContent();
+            return;
+          }
+        }
+
+        this.showUnauthorizedContent();
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+        this.showUnauthorizedContent();
+      }
+    }
+
+    showAuthorizedContent() {
+      this.isAuthenticated = true;
+
+      // Limpiar interval si existe
+      if (this.checkInterval) {
+        clearInterval(this.checkInterval);
+        this.checkInterval = null;
+      }
+
+      // Mostrar contenido autorizado
+      this.loadingEl.classList.add('hidden');
+      this.unauthorizedEl.classList.add('hidden');
+      this.authorizedEl.classList.remove('hidden');
+
+      // Cargar iframe si tiene src
+      if (this.config.src && this.iframe) {
+        this.iframe.src = this.config.src;
+
+        // Manejar carga del iframe
+        this.iframe.onload = () => {
+          this.iframeOverlay.classList.add('hidden');
+        };
+
+        // Timeout de seguridad
+        setTimeout(() => {
+          this.iframeOverlay.classList.add('hidden');
+        }, 15000);
+      } else {
+        this.iframeOverlay.classList.add('hidden');
+      }
+    }
+
+    showUnauthorizedContent() {
+      this.isAuthenticated = false;
+      this.loadingEl.classList.add('hidden');
+      this.authorizedEl.classList.add('hidden');
+      this.unauthorizedEl.classList.remove('hidden');
+    }
+
+    refresh() {
+      if (!this.isAuthenticated) {
+        this.checkAuthentication();
+        return;
+      }
+
+      if (this.iframe && this.config.src) {
+        this.refreshIndicator.classList.remove('hidden');
+        this.iframeOverlay.classList.remove('hidden');
+
+        // Recargar iframe
+        const refreshUrl = this.config.src + (this.config.src.includes('?') ? '&' : '?') + '_refresh=' + Date.now();
+        this.iframe.src = refreshUrl;
+
+        this.iframe.onload = () => {
+          this.iframeOverlay.classList.add('hidden');
+          this.refreshIndicator.classList.add('hidden');
+        };
+
+        setTimeout(() => {
+          this.iframeOverlay.classList.add('hidden');
+          this.refreshIndicator.classList.add('hidden');
+        }, 10000);
+      }
+    }
+
+    setupEventListeners() {
+      // Evento de focus en la ventana para re-verificar autenticación
+      window.addEventListener('focus', () => {
+        if (!this.isAuthenticated) {
+          this.checkAuthentication();
+        }
+      });
+
+      // Agregar listener al botón de refresh
+      const refreshButton = this.element.querySelector('.refresh-widget-btn');
+      if (refreshButton) {
+        refreshButton.addEventListener('click', () => this.refresh());
+      }
+    }
+  }
+
+  // Inicializar el widget específico cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', () => {
+    const widgets = document.querySelectorAll('.moodle-widget');
+    widgets.forEach(widget => {
+      if (!widget._moodleWidget) {
+        widget._moodleWidget = new MoodleWidget(widget);
+      }
+    });
+  });
+</script><style>
+  .moodle-widget iframe {
+    border: none;
+    min-height: 300px;
+  }
+
+  @media (max-width: 768px) {
+    .moodle-widget iframe {
+      min-height: 250px;
+    }
+  }
+
+  /* Animación suave para las transiciones */
+  .moodle-widget > div {
+    transition: opacity 0.3s ease-in-out;
+  }
+</style>

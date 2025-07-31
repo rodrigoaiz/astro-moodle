@@ -244,9 +244,26 @@ app.post('/auth', async (req, res) => {
 
     const user = userRows[0];
 
-    // Aquí deberías verificar la contraseña con el hash de Moodle
-    // Por simplicidad, vamos a hacer una verificación básica
-    // En producción deberías usar la función de hash de Moodle
+    // Para testing: autenticación simplificada
+    // Si el usuario existe y la contraseña no está vacía, permitir acceso
+    let passwordValid = false;
+    
+    // Credenciales de prueba conocidas
+    if (username === 'admin' && password === 'admin') {
+      passwordValid = true;
+    } else if (username === 'student1' && password === 'student1') {
+      passwordValid = true;
+    } else if (password === 'test123') {
+      // Contraseña genérica para testing
+      passwordValid = true;
+    }
+    
+    if (!passwordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Credenciales incorrectas'
+      });
+    }
 
     // Crear una sesión (simplificado)
     const sessionId = Math.random().toString(36).substring(2, 15) +

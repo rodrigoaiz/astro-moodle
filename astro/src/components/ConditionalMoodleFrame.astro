@@ -1,0 +1,202 @@
+---
+// Componente que muestra iframe de Moodle solo si el usuario está autenticado
+export interface Props {
+  src: string;
+  title?: string;
+  height?: string;
+}
+
+const { src, title = "Contenido de Moodle", height = "h-64 md:h-96" } = Astro.props;
+---
+
+<div class="conditional-moodle-frame w-full">
+  <!-- Estado inicial de carga -->
+  <div id="auth-checking" class={`w-full ${height} rounded-lg card p-8 flex items-center justify-center`}>
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+      <p class="text-white/70">Verificando acceso...</p>
+    </div>
+  </div>
+
+  <!-- Placeholder para usuarios no autenticados -->
+  <div id="not-authenticated" class={`hidden w-full ${height} rounded-lg card p-8 flex items-center justify-center`}>
+    <div class="text-center max-w-md">
+      <div class="text-6xl mb-4">🔒</div>
+      <h3 class="text-2xl font-bold text-white mb-4">Acceso Restringido</h3>
+      <p class="text-white/70 mb-6">
+        Inicia sesión para ver el contenido de <span class="text-yellow-400">{title}</span>
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="/learning/login/index.php" class="btn btn-accent">
+          🚀 Iniciar Sesión
+        </a>
+        <button onclick="checkAuthAgain()" class="btn btn-secondary">
+          🔄 Verificar de nuevo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Iframe para usuarios autenticados -->
+  <div id="authenticated-content" class="hidden w-full">
+    <div class="relative">
+      <!-- Badge de usuario autenticado -->
+      <div class="absolute top-4 right-4 z-10 bg-green-500/80 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
+        ✅ Autenticado
+      </div>
+
+      <!-- Iframe -->
+      <iframe
+        id="moodle-iframe"
+        src=""
+        class={`w-full ${height} rounded-lg shadow-lg border border-white/10`}
+        allowfullscreen
+        title={title}>
+      </iframe>
+
+      <!-- Overlay de carga del iframe -->
+      <div id="iframe-loading" class="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-lg flex items-center justify-center">
+        <div class="text-center text-white">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+          <p>Cargando contenido...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ src, title }}>
+  // Configuración de la API
+  const API_CONFIG = {
+    baseUrl: '/api',
+    endpoints: {
+      auth: '/auth',
+      checkSession: '/check-session'
+    }
+  };
+
+  // Elementos del DOM
+  let authCheckingElement;
+  let notAuthenticatedElement;
+  let authenticatedContentElement;
+  let moodleIframe;
+  let iframeLoadingElement;
+
+  // Función para verificar autenticación
+  async function checkAuthentication() {
+    try {
+      // Primero verificar nuestro sistema de auth
+      const authResponse = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
+
+      if (authResponse.ok) {
+        const authData = await authResponse.json();
+        if (authData.authenticated && authData.user) {
+          showAuthenticatedContent();
+          return;
+        }
+      }
+
+      // Si no está autenticado con nuestro sistema, verificar sesión de Moodle
+      const sessionResponse = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.checkSession}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
+
+      if (sessionResponse.ok) {
+        const sessionData = await sessionResponse.json();
+        if (sessionData.loggedIn && sessionData.user) {
+          showAuthenticatedContent();
+          return;
+        }
+      }
+
+      // Usuario no autenticado
+      showNotAuthenticated();
+
+    } catch (error) {
+      console.error('Error verificando autenticación:', error);
+      showNotAuthenticated();
+    }
+  }
+
+  // Función para mostrar contenido autenticado
+  function showAuthenticatedContent() {
+    authCheckingElement.classList.add('hidden');
+    notAuthenticatedElement.classList.add('hidden');
+    authenticatedContentElement.classList.remove('hidden');
+
+    // Configurar iframe
+    moodleIframe.src = src;
+
+    // Manejar carga del iframe
+    moodleIframe.onload = function() {
+      iframeLoadingElement.classList.add('hidden');
+    };
+
+    // Timeout para ocultar loading si tarda mucho
+    setTimeout(() => {
+      iframeLoadingElement.classList.add('hidden');
+    }, 10000);
+  }
+
+  // Función para mostrar estado no autenticado
+  function showNotAuthenticated() {
+    authCheckingElement.classList.add('hidden');
+    authenticatedContentElement.classList.add('hidden');
+    notAuthenticatedElement.classList.remove('hidden');
+  }
+
+  // Función para verificar autenticación de nuevo (llamada desde el botón)
+  window.checkAuthAgain = function() {
+    // Mostrar estado de carga
+    notAuthenticatedElement.classList.add('hidden');
+    authCheckingElement.classList.remove('hidden');
+
+    // Verificar de nuevo después de un breve delay
+    setTimeout(checkAuthentication, 1000);
+  };
+
+  // Inicializar cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', function() {
+    authCheckingElement = document.getElementById('auth-checking');
+    notAuthenticatedElement = document.getElementById('not-authenticated');
+    authenticatedContentElement = document.getElementById('authenticated-content');
+    moodleIframe = document.getElementById('moodle-iframe');
+    iframeLoadingElement = document.getElementById('iframe-loading');
+
+    // Verificar autenticación
+    checkAuthentication();
+  });
+
+  // Re-verificar cuando la ventana vuelve a tener foco (útil si el usuario se autentica en otra pestaña)
+  window.addEventListener('focus', function() {
+    if (!authenticatedContentElement.classList.contains('hidden')) {
+      return; // Ya está autenticado
+    }
+    checkAuthentication();
+  });
+</script>
+
+<style>
+  /* Asegurar que el iframe se vea bien en todos los dispositivos */
+  iframe {
+    min-height: 400px;
+  }
+
+  @media (max-width: 768px) {
+    iframe {
+      min-height: 300px;
+    }
+  }
+</style>

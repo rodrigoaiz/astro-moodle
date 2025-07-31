@@ -1,7 +1,7 @@
 ---
 import Logo from "@/components/Logo.astro";
 import menu from "@/config/menu.json";
-import AuthWidget from "@/components/AuthWidget.astro";
+import AuthWidgetReact from "@/components/AuthWidgetReact.tsx";
 const { main }: { main: { name: string; url: string }[] } = menu;
 ---
 
@@ -31,7 +31,7 @@ const { main }: { main: { name: string; url: string }[] } = menu;
 
       <!-- Auth Widget -->
       <div class="flex items-center">
-        <AuthWidget />
+        <AuthWidgetReact client:load />
       </div>
 
       <!-- Mobile Menu Button -->

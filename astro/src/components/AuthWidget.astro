@@ -211,12 +211,34 @@
       if (response.ok && data.success) {
         // Login exitoso - mostrar información del usuario
         showUserInfo(data.user);
+
+        // 🚀 NOTIFICAR A OTRAS PESTAÑAS/WIDGETS DEL CAMBIO DE AUTH
+        notifyAuthChange();
       } else {
         showLoginError(data.message || 'Credenciales incorrectas');
       }
     } catch (error) {
       console.error('Error durante el login:', error);
       showLoginError('Error de conexión. Inténtalo de nuevo.');
+    }
+  }
+
+  // Función para notificar cambios de autenticación a otras pestañas/widgets
+  function notifyAuthChange() {
+    try {
+      // Notificar via localStorage (funciona entre pestañas)
+      localStorage.setItem('moodle_auth_changed', 'true');
+      setTimeout(() => localStorage.removeItem('moodle_auth_changed'), 100);
+
+      // Notificar via postMessage a todas las ventanas
+      window.postMessage({
+        type: 'MOODLE_AUTH_CHANGED',
+        timestamp: Date.now()
+      }, window.location.origin);
+
+      console.log('Auth change notification sent');
+    } catch (error) {
+      console.error('Error notifying auth change:', error);
     }
   }
 
@@ -284,16 +306,23 @@
       if (response.ok) {
         // Logout exitoso - mostrar formulario de login
         showLoginForm();
+
+        // 🚀 NOTIFICAR A OTRAS PESTAÑAS/WIDGETS DEL CAMBIO DE AUTH
+        notifyAuthChange();
       } else {
         console.warn('Error en logout:', response.status);
         // Aún así mostrar el formulario de login
         showLoginForm();
+        // Y notificar el cambio
+        notifyAuthChange();
       }
 
     } catch (error) {
       console.error('Error durante logout:', error);
       // En caso de error, aún así mostrar formulario de login
       showLoginForm();
+      // Y notificar el cambio
+      notifyAuthChange();
     }
   }
 
