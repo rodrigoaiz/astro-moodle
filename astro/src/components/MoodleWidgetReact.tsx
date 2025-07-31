@@ -30,8 +30,8 @@ const MoodleWidget: React.FC<MoodleWidgetProps> = ({
       const authResponse = await fetch('/api/auth', {
         method: 'GET',
         credentials: 'include',
-        headers: { 
-          'Accept': 'application/json', 
+        headers: {
+          'Accept': 'application/json',
           'Cache-Control': 'no-cache',
           ...(sessionId && { 'X-Session-Id': sessionId })
         }

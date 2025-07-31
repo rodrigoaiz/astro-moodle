@@ -247,7 +247,7 @@ app.post('/auth', async (req, res) => {
     // Para testing: autenticación simplificada
     // Si el usuario existe y la contraseña no está vacía, permitir acceso
     let passwordValid = false;
-    
+
     // Credenciales de prueba conocidas
     if (username === 'admin' && password === 'admin') {
       passwordValid = true;
@@ -257,7 +257,7 @@ app.post('/auth', async (req, res) => {
       // Contraseña genérica para testing
       passwordValid = true;
     }
-    
+
     if (!passwordValid) {
       return res.status(401).json({
         success: false,

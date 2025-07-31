@@ -50,7 +50,7 @@ const AuthWidgetReact: React.FC = () => {
 
       // Obtener sessionId guardado
       const sessionId = localStorage.getItem('moodle_session_id');
-      
+
       // Verificar autenticación local primero
       const authResponse = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth}`, {
         method: 'GET',
@@ -67,7 +67,7 @@ const AuthWidgetReact: React.FC = () => {
         console.log('AuthWidget: Local auth response:', authData);
         if (authData.authenticated) {
           console.log('AuthWidget: User is authenticated locally');
-          
+
           // Obtener información del perfil del usuario
           const profileResponse = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.profile}`, {
             method: 'GET',
@@ -152,12 +152,12 @@ const AuthWidgetReact: React.FC = () => {
 
       if (response.ok && data.success) {
         console.log('AuthWidget: Login successful');
-        
+
         // Guardar sessionId en localStorage
         if (data.sessionId) {
           localStorage.setItem('moodle_session_id', data.sessionId);
         }
-        
+
         setAuthState('logged-in');
         setUserData(data.user);
         setLoginError('');
