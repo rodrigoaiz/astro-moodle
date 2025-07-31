@@ -5,22 +5,24 @@ import AuthWidget from "@/components/AuthWidget.astro";
 const { main }: { main: { name: string; url: string }[] } = menu;
 ---
 
-<header class="bg-white shadow-md sticky top-0 z-50">
-  <div class="container mx-auto px-4">
+<header class="glass sticky top-0 z-50 border-b border-white/10">
+  <div class="container">
     <div class="flex justify-between items-center py-4">
       <!-- Logo -->
       <div class="flex items-center">
-        <a href="/" class="flex items-center space-x-2">
-          <Logo class="h-10 md:h-12 hover:scale-105 transition-transform duration-200" />
+        <a href="/" class="flex items-center space-x-3 group">
+          <Logo class="h-10 md:h-12 group-hover:scale-105 transition-transform duration-300" />
+          <div class="hidden md:block">
+          </div>
         </a>
       </div>
 
       <!-- Navigation Menu -->
-      <nav class="hidden md:flex items-center space-x-8">
+      <nav class="hidden lg:flex items-center space-x-6">
         {main.map((item) => (
           <a
             href={item.url}
-            class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
+            class="text-white/80 hover:text-yellow-400 font-medium transition-colors duration-200 hover:scale-105 transform"
           >
             {item.name}
           </a>
@@ -32,9 +34,9 @@ const { main }: { main: { name: string; url: string }[] } = menu;
         <AuthWidget />
       </div>
 
-      <!-- Mobile Menu Button (for future implementation) -->
-      <div class="md:hidden">
-        <button class="text-gray-700 hover:text-blue-600">
+      <!-- Mobile Menu Button -->
+      <div class="lg:hidden">
+        <button class="text-white/80 hover:text-yellow-400 p-2">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
           </svg>

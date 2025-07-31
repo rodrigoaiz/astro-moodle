@@ -1,1 +1,249 @@
 @import "tailwindcss";
+
+/* ========================================
+   🎨 SISTEMA DE COLORES JUVENIL MODERNO
+   Base: #4e1a6e (Morado profundo)
+   Paleta: Análogos + Complementarios
+   ======================================== */
+
+:root {
+  /* 🟣 Colores principales - Morados */
+  --color-primary: #4e1a6e;
+  --color-primary-light: #6b2d8a;
+  --color-primary-lighter: #8b4aa6;
+  --color-primary-dark: #3a1355;
+  --color-primary-darker: #2a0e3f;
+
+  /* 🔵 Colores análogos - Azules */
+  --color-secondary: #1a4e6e;
+  --color-secondary-light: #2d6b8a;
+  --color-secondary-lighter: #4a8ba6;
+  --color-secondary-dark: #133a55;
+  --color-secondary-darker: #0e2a3f;
+
+  /* 🌸 Colores análogos - Rosa/Magenta */
+  --color-tertiary: #6e1a4e;
+  --color-tertiary-light: #8a2d6b;
+  --color-tertiary-lighter: #a64a8b;
+  --color-tertiary-dark: #55133a;
+  --color-tertiary-darker: #3f0e2a;
+
+  /* 🟡 Color complementario - Amarillo/Dorado */
+  --color-accent: #f1c40f;
+  --color-accent-light: #f4d03f;
+  --color-accent-lighter: #f7dc6f;
+  --color-accent-dark: #d4ac0d;
+  --color-accent-darker: #b7950b;
+
+  /* 🎨 Gradientes juveniles */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-tertiary) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  --gradient-hero: linear-gradient(135deg, var(--color-primary-darker) 0%, var(--color-primary) 30%, var(--color-secondary) 70%, var(--color-tertiary) 100%);
+  --gradient-card: linear-gradient(145deg, rgba(78, 26, 110, 0.9) 0%, rgba(26, 78, 110, 0.8) 100%);
+
+  /* 🌟 Efectos y sombras */
+  --shadow-glow: 0 0 20px rgba(78, 26, 110, 0.3);
+  --shadow-card: 0 10px 30px rgba(78, 26, 110, 0.2);
+  --shadow-button: 0 5px 15px rgba(78, 26, 110, 0.3);
+  --backdrop-blur: backdrop-filter: blur(10px);
+}
+footer {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+/* ========================================
+   🌐 ESTILOS BASE DEL SITIO
+   ======================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: var(--gradient-hero);
+  min-height: 100vh;
+  color: #ffffff;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ========================================
+   🎯 COMPONENTES GLOBALES
+   ======================================== */
+
+/* 📱 Contenedores principales */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* 🃏 Cards modernas */
+.card {
+  background: var(--gradient-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-glow);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 🎈 Botones modernos */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  box-shadow: var(--shadow-button);
+}
+
+.btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(78, 26, 110, 0.4);
+}
+
+.btn-secondary {
+  background: var(--gradient-secondary);
+  color: white;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(26, 78, 110, 0.4);
+}
+
+.btn-accent {
+  background: var(--gradient-accent);
+  color: var(--color-primary-darker);
+}
+
+.btn-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(241, 196, 15, 0.4);
+}
+
+/* ✨ Efectos especiales */
+.glow {
+  box-shadow: var(--shadow-glow);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 📝 Formularios modernos */
+.form-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  color: white;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* 🌈 Animaciones */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: var(--shadow-glow); }
+  50% { box-shadow: 0 0 30px rgba(78, 26, 110, 0.5); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* ========================================
+   📱 RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 0.75rem;
+  }
+
+  .btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .card {
+    border-radius: 12px;
+  }
+}
+
+/* ========================================
+   🎨 UTILIDADES PERSONALIZADAS
+   ======================================== */
+
+.text-gradient {
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-dots {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}

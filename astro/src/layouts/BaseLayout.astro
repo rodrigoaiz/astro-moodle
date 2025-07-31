@@ -21,9 +21,9 @@ const { title = "Plataforma Educativa", description = "Sistema integrado de apre
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <slot name="head" />
   </head>
-  <body class="bg-gray-50 min-h-screen flex flex-col antialiased">
+  <body class="min-h-screen flex flex-col antialiased bg-dots">
     <BaseHeader />
-    <main class="flex-1">
+    <main class="flex-1 relative">
       <slot />
     </main>
     <Footer />

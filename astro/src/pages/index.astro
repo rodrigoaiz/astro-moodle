@@ -7,98 +7,150 @@ const description = "Sistema integrado de aprendizaje con Astro y Moodle";
 ---
 
 <BaseLayout title={title} description={description}>
-  <!-- Test Tailwind CSS -->
-  <section class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4">
-    <div class="container mx-auto px-4 text-center">
-      <h2 class="text-2xl font-bold mb-2">🎉 Astro 5 + Tailwind CSS</h2>
-      <p class="opacity-90">¡Actualización exitosa! Frontend moderno con Tailwind CSS funcionando.</p>
-    </div>
-  </section>
+  <!-- Hero Section Moderno y Juvenil -->
+  <section class="relative py-20 overflow-hidden">
 
-  <!-- Hero Section -->
-  <section class="py-20 bg-white">
-    <div class="container mx-auto px-4 text-center">
-      <h1 class="text-5xl font-bold text-gray-900 mb-6">
-        🎓 Plataforma Educativa
-      </h1>
-      <p class="text-xl text-gray-600 mb-4 max-w-3xl mx-auto">
-        Sistema integrado de aprendizaje moderno con tecnologías avanzadas
-      </p>
-      <p class="text-lg text-gray-500 mb-8 max-w-2xl mx-auto">
-        Astro + Moodle + Docker para una experiencia educativa completa
-      </p>
 
-      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-        <a
-          href="/learning"
-          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
-        >
-          Entrar a Moodle
-        </a>
-        <a
-          href="/learning/login/index.php"
-          class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
-        >
-          Iniciar Sesión
-        </a>
+    <div class="container relative z-10">
+      <div class="text-center max-w-4xl mx-auto">
+        <!-- Badge de bienvenida -->
+        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6 animate-float">
+          <span class="text-yellow-400">✨</span>
+          <span class="text-sm font-medium">¡Bienvenido a tu plataforma educativa!</span>
+        </div>
+        <iframe src="http://132.248.218.76:4324/mod/assign/view.php?id=2" class="w-full h-64 md:h-96 rounded-lg shadow-lg mb-8" allowfullscreen></iframe>
+        <!-- Título principal -->
+        <h1 class="text-6xl md:text-7xl font-bold mb-6 leading-tight">
+          <span class="text-gradient">Aprende</span><br>
+          <span class="text-white">sin límites</span>
+        </h1>
+
+        <!-- Descripción -->
+        <p class="text-xl md:text-2xl text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed">
+          Tu futuro comienza aquí. Plataforma educativa moderna diseñada para
+          <span class="text-yellow-400 font-semibold">estudiantes como tú</span>
+        </p>
+
+        <!-- Botones de acción -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+          <a href="/learning" class="btn btn-accent animate-glow">
+            🚀 Explorar Cursos
+          </a>
+          <a href="/learning/login/index.php" class="btn btn-primary">
+            📚 Iniciar Sesión
+          </a>
+        </div>
+
+        <!-- Stats o indicadores -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-yellow-400 mb-1">100+</div>
+            <div class="text-sm text-white/70">Cursos disponibles</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-yellow-400 mb-1">24/7</div>
+            <div class="text-sm text-white/70">Acceso disponible</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-yellow-400 mb-1">∞</div>
+            <div class="text-sm text-white/70">Oportunidades</div>
+          </div>
+          <div class="text-center">
+            <div class="text-3xl font-bold text-yellow-400 mb-1">🎓</div>
+            <div class="text-sm text-white/70">Tu éxito</div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Features Section -->
-  <section class="py-16 bg-gray-50">
-    <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">
-        ¿Por qué elegir nuestra plataforma?
-      </h2>
+  <!-- Features Section Modernas -->
+  <section class="py-20 relative">
+    <div class="container">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+          ¿Por qué elegir <span class="text-gradient">nuestra plataforma</span>?
+        </h2>
+        <p class="text-xl text-white/70 max-w-2xl mx-auto">
+          Tecnología de vanguardia para una experiencia educativa única
+        </p>
+      </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="feature-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-          <div class="text-blue-600 text-4xl mb-4">🚀</div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-3">Tecnología Moderna</h3>
-          <p class="text-gray-600">
-            Construido con Astro, ofreciendo velocidad excepcional y una experiencia de usuario fluida.
+        <!-- Feature 1 -->
+        <div class="card p-8 group hover:scale-105 transition-transform duration-300">
+          <div class="text-6xl mb-6 group-hover:animate-float">🚀</div>
+          <h3 class="text-2xl font-bold text-white mb-4">Súper Rápido</h3>
+          <p class="text-white/70 text-lg leading-relaxed">
+            Tecnología Astro de última generación. Carga instantánea, navegación fluida.
           </p>
         </div>
 
-        <div class="feature-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-          <div class="text-green-600 text-4xl mb-4">📚</div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-3">LMS Completo</h3>
-          <p class="text-gray-600">
-            Moodle integrado con todas las herramientas necesarias para el aprendizaje y la enseñanza.
+        <!-- Feature 2 -->
+        <div class="card p-8 group hover:scale-105 transition-transform duration-300">
+          <div class="text-6xl mb-6 group-hover:animate-float">�</div>
+          <h3 class="text-2xl font-bold text-white mb-4">100% Mobile</h3>
+          <p class="text-white/70 text-lg leading-relaxed">
+            Diseñado para tu celular. Estudia donde quieras, cuando quieras.
           </p>
         </div>
 
-        <div class="feature-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-          <div class="text-purple-600 text-4xl mb-4">🔐</div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-3">Autenticación Segura</h3>
-          <p class="text-gray-600">
-            Sistema de autenticación unificado que mantiene tus datos seguros y accesibles.
+        <!-- Feature 3 -->
+        <div class="card p-8 group hover:scale-105 transition-transform duration-300">
+          <div class="text-6xl mb-6 group-hover:animate-float">🎯</div>
+          <h3 class="text-2xl font-bold text-white mb-4">Fácil de Usar</h3>
+          <p class="text-white/70 text-lg leading-relaxed">
+            Interfaz intuitiva que entiende a los estudiantes de hoy.
           </p>
         </div>
 
-        <div class="feature-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-          <div class="text-yellow-600 text-4xl mb-4">📱</div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-3">Responsive</h3>
-          <p class="text-gray-600">
-            Funciona perfectamente en cualquier dispositivo: computadoras, tablets y móviles.
+        <!-- Feature 4 -->
+        <div class="card p-8 group hover:scale-105 transition-transform duration-300">
+          <div class="text-6xl mb-6 group-hover:animate-float">�</div>
+          <h3 class="text-2xl font-bold text-white mb-4">Súper Seguro</h3>
+          <p class="text-white/70 text-lg leading-relaxed">
+            Tus datos protegidos con la mejor tecnología de seguridad.
           </p>
         </div>
 
-        <div class="feature-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-          <div class="text-red-600 text-4xl mb-4">⚡</div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-3">Alto Rendimiento</h3>
-          <p class="text-gray-600">
-            Optimizado para carga rápida y experiencia fluida en todas las interacciones.
+        <!-- Feature 5 -->
+        <div class="card p-8 group hover:scale-105 transition-transform duration-300">
+          <div class="text-6xl mb-6 group-hover:animate-float">⚡</div>
+          <h3 class="text-2xl font-bold text-white mb-4">Ultra Moderno</h3>
+          <p class="text-white/70 text-lg leading-relaxed">
+            La plataforma más moderna para la nueva generación de estudiantes.
           </p>
         </div>
 
-        <div class="feature-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-          <div class="text-indigo-600 text-4xl mb-4">🎯</div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-3">Fácil de Usar</h3>
-          <p class="text-gray-600">
-            Interfaz intuitiva diseñada para estudiantes y profesores de todos los niveles técnicos.
+        <!-- Feature 6 -->
+        <div class="card p-8 group hover:scale-105 transition-transform duration-300">
+          <div class="text-6xl mb-6 group-hover:animate-float">�</div>
+          <h3 class="text-2xl font-bold text-white mb-4">Experiencia Única</h3>
+          <p class="text-white/70 text-lg leading-relaxed">
+            Cada detalle pensado para hacer tu aprendizaje más divertido.
           </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20">
+    <div class="container">
+      <div class="card p-12 text-center max-w-4xl mx-auto">
+        <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+          ¿Listo para <span class="text-gradient">comenzar</span>?
+        </h2>
+        <p class="text-xl text-white/70 mb-8 max-w-2xl mx-auto">
+          Únete a miles de estudiantes que ya están transformando su futuro
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/learning" class="btn btn-accent text-lg px-8 py-4">
+            🎓 Comenzar Ahora
+          </a>
+          <a href="/learning/login/index.php" class="btn btn-secondary text-lg px-8 py-4">
+            👋 Ya tengo cuenta
+          </a>
         </div>
       </div>
     </div>
