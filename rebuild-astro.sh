@@ -46,10 +46,10 @@ show_progress() {
     local total=$2
     local message=$3
     local percentage=$((step * 100 / total))
-    
+
     echo -e "\n${CYAN}═══ Paso $step/$total ═══${NC}"
     echo -e "${BLUE}▶ $message${NC}"
-    
+
     # Barra de progreso
     local filled=$((percentage / 5))
     local empty=$((20 - filled))
@@ -74,7 +74,7 @@ check_docker() {
         echo -e "${RED}❌ Error: Docker no está instalado${NC}"
         exit 1
     fi
-    
+
     if ! docker info &> /dev/null; then
         echo -e "${RED}❌ Error: Docker no está ejecutándose${NC}"
         exit 1
@@ -84,16 +84,16 @@ check_docker() {
 # Función principal de reconstrucción
 rebuild_astro() {
     show_banner
-    
+
     echo -e "${YELLOW}🔍 Verificando prerrequisitos...${NC}"
     check_directory
     check_docker
     echo -e "${GREEN}✅ Todos los prerrequisitos están listos${NC}"
-    
+
     # Paso 1: Construcción de archivos estáticos
     show_progress 1 4 "Construyendo archivos estáticos de Astro"
     echo -e "${CYAN}📦 Ejecutando: npm run build${NC}"
-    
+
     cd astro
     if npm run build; then
         echo -e "${GREEN}✅ Build de Astro completado exitosamente${NC}"
@@ -102,56 +102,56 @@ rebuild_astro() {
         exit 1
     fi
     cd ..
-    
+
     # Paso 2: Reconstrucción de imagen Docker
     show_progress 2 4 "Reconstruyendo imagen Docker"
     echo -e "${CYAN}🐳 Ejecutando: docker compose build --no-cache astro${NC}"
-    
+
     if docker compose build --no-cache astro; then
         echo -e "${GREEN}✅ Imagen Docker reconstruida exitosamente${NC}"
     else
         echo -e "${RED}❌ Error al reconstruir imagen Docker${NC}"
         exit 1
     fi
-    
+
     # Paso 3: Levantando contenedor
     show_progress 3 4 "Levantando contenedor actualizado"
     echo -e "${CYAN}🚀 Ejecutando: docker compose up astro -d${NC}"
-    
+
     if docker compose up astro -d; then
         echo -e "${GREEN}✅ Contenedor levantado exitosamente${NC}"
     else
         echo -e "${RED}❌ Error al levantar contenedor${NC}"
         exit 1
     fi
-    
+
     # Paso 4: Verificación
     show_progress 4 4 "Verificando el funcionamiento"
     echo -e "${CYAN}🔎 Verificando disponibilidad del frontend...${NC}"
-    
+
     sleep 3  # Dar tiempo al contenedor para inicializar
-    
+
     if curl -s -o /dev/null -w "%{http_code}" http://132.248.218.76:4324/ | grep -q "200"; then
         echo -e "${GREEN}✅ Frontend disponible en http://132.248.218.76:4324/${NC}"
     else
         echo -e "${YELLOW}⚠️ El frontend podría tardar unos segundos más en estar disponible${NC}"
     fi
-    
+
     # Mostrar estado final
     echo -e "\n${PURPLE}═══════════════════════════════════════════════════════════════════${NC}"
     echo -e "${GREEN}🎉 ¡RECONSTRUCCIÓN COMPLETADA EXITOSAMENTE! 🎉${NC}"
     echo -e "${PURPLE}═══════════════════════════════════════════════════════════════════${NC}"
-    
+
     echo -e "\n${CYAN}📊 Información del sistema:${NC}"
     echo -e "${BLUE}🌐 Frontend:${NC} http://132.248.218.76:4324/"
     echo -e "${BLUE}🔐 API Auth:${NC} http://132.248.218.76:4324/api/auth"
     echo -e "${BLUE}📚 Moodle:${NC} http://132.248.218.76:4324/learning/"
-    
+
     echo -e "\n${YELLOW}💡 Comandos útiles:${NC}"
     echo -e "${BLUE}• Ver logs del contenedor:${NC} docker compose logs astro -f"
     echo -e "${BLUE}• Reiniciar solo astro:${NC} docker compose restart astro"
     echo -e "${BLUE}• Ver estado:${NC} docker compose ps"
-    
+
     echo -e "\n${GREEN}🚀 ¡Listo para usar!${NC}\n"
 }
 
@@ -174,23 +174,23 @@ show_help() {
 show_status() {
     echo -e "${CYAN}📊 Estado de contenedores Docker:${NC}\n"
     docker compose ps
-    
+
     echo -e "\n${CYAN}🌐 Verificando conectividad:${NC}"
-    
+
     # Verificar frontend
     if curl -s -o /dev/null -w "%{http_code}" http://132.248.218.76:4324/ | grep -q "200"; then
         echo -e "${GREEN}✅ Frontend:${NC} http://132.248.218.76:4324/ - ${GREEN}ACTIVO${NC}"
     else
         echo -e "${RED}❌ Frontend:${NC} http://132.248.218.76:4324/ - ${RED}NO DISPONIBLE${NC}"
     fi
-    
+
     # Verificar API
     if curl -s -o /dev/null -w "%{http_code}" http://132.248.218.76:4324/api/auth | grep -q "200"; then
         echo -e "${GREEN}✅ API Auth:${NC} http://132.248.218.76:4324/api/auth - ${GREEN}ACTIVA${NC}"
     else
         echo -e "${RED}❌ API Auth:${NC} http://132.248.218.76:4324/api/auth - ${RED}NO DISPONIBLE${NC}"
     fi
-    
+
     # Verificar Moodle
     if curl -s -o /dev/null -w "%{http_code}" http://132.248.218.76:4324/learning/ | grep -q "200"; then
         echo -e "${GREEN}✅ Moodle:${NC} http://132.248.218.76:4324/learning/ - ${GREEN}ACTIVO${NC}"

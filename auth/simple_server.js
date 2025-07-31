@@ -12,18 +12,18 @@ app.use((req, res, next) => {
 // Ruta GET /auth para testing
 app.get('/auth', (req, res) => {
   console.log('✅ Ruta /auth funcionando');
-  res.json({ 
-    authenticated: false, 
+  res.json({
+    authenticated: false,
     message: 'Ruta funcionando correctamente',
     timestamp: new Date().toISOString()
   });
 });
 
-// Ruta POST /auth para testing  
+// Ruta POST /auth para testing
 app.post('/auth', (req, res) => {
   console.log('✅ POST /auth funcionando');
-  res.json({ 
-    success: false, 
+  res.json({
+    success: false,
     message: 'POST funcionando correctamente',
     body: req.body
   });
