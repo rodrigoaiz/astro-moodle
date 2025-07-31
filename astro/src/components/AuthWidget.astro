@@ -1,0 +1,309 @@
+---
+// Widget de autenticación reutilizable
+---
+
+<div class="auth-widget bg-white/10 backdrop-blur-sm rounded-lg p-4 min-w-[280px]">
+  <div id="auth-status" class="text-center">
+    <div class="loading-spinner">
+      <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto"></div>
+      <p class="mt-2 text-sm opacity-80">Verificando sesión...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Interfaces TypeScript para los datos del usuario
+  interface UserData {
+    fullname?: string;
+    email?: string;
+    authenticated?: boolean;
+  }
+
+  // Configuración de la API
+  const API_CONFIG = {
+    baseUrl: '/api',
+    endpoints: {
+      auth: '/auth',
+      profile: '/profile'
+    }
+  };
+
+  // Elementos del DOM
+  let authStatusElement: HTMLElement | null;
+  let loginFormHtml: string;
+  let loggedInHtml: string;
+
+  // Inicializar cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', function() {
+    authStatusElement = document.getElementById('auth-status');
+
+    // Templates HTML
+    loginFormHtml = `
+      <div class="auth-form">
+        <h3 class="text-lg font-semibold mb-3 text-center">Iniciar Sesión</h3>
+        <form id="loginForm" class="space-y-3">
+          <div>
+            <input type="text" 
+                   id="username" 
+                   placeholder="Usuario" 
+                   required
+                   class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white placeholder-white/60 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400">
+          </div>
+          <div>
+            <input type="password" 
+                   id="password" 
+                   placeholder="Contraseña" 
+                   required
+                   class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white placeholder-white/60 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400">
+          </div>
+          <button type="submit" 
+                  class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors duration-200">
+            Entrar
+          </button>
+          <div class="text-xs text-blue-300 text-center">
+            Usa tus credenciales de Moodle
+          </div>
+        </form>
+      </div>
+    `;
+
+    // Verificar estado de autenticación
+    checkAuthStatus();
+  });
+
+  // Función para verificar el estado de autenticación
+  async function checkAuthStatus() {
+    try {
+      // Primero verificamos nuestro sistema de auth
+      const authResponse = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
+
+      if (authResponse.ok) {
+        const authData = await authResponse.json();
+        if (authData.authenticated && authData.user) {
+          // Usuario autenticado con nuestro sistema - mostrar información
+          showUserInfo(authData.user);
+          return;
+        }
+      }
+
+      // Si no está autenticado con nuestro sistema, verificar si hay sesión de Moodle
+      const sessionResponse = await fetch('/api/check-session', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
+
+      if (sessionResponse.ok) {
+        const sessionData = await sessionResponse.json();
+        if (sessionData.loggedIn && sessionData.user) {
+          // Usuario tiene sesión de Moodle pero no está autenticado en nuestro sistema
+          // Mostrar información del usuario pero con opción de login local
+          showUserInfo(sessionData.user);
+          return;
+        }
+      }
+
+      // Usuario no autenticado - mostrar formulario de login
+      showLoginForm();
+
+    } catch (error) {
+      console.error('Error de conexión:', error);
+      showConnectionError();
+    }
+  }
+
+  // Función para mostrar información del usuario
+  function showUserInfo(userData: any) {
+    const fullName = userData.name || userData.fullname || `${userData.firstname || ''} ${userData.lastname || ''}`.trim() || 'Usuario';
+    const email = userData.email || '';
+    const firstLetter = fullName.charAt(0).toUpperCase();
+
+    loggedInHtml = `
+      <div class="user-info">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+            ${firstLetter}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-medium text-white truncate">¡Hola ${fullName}!</p>
+            ${email ? `<p class="text-xs text-blue-200 truncate">${email}</p>` : ''}
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <a href="/learning/my/"
+            class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-3 rounded transition-colors duration-200">
+            Mi Panel
+          </a>
+          <a href="/learning/course/"
+            class="block w-full text-center bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded transition-colors duration-200">
+            Mis Cursos
+          </a>
+          <button onclick="logout()"
+            class="block w-full text-center bg-red-500 hover:bg-red-600 text-white text-sm py-2 px-3 rounded transition-colors duration-200">
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    `;
+
+    if (authStatusElement) {
+      authStatusElement.innerHTML = loggedInHtml;
+    }
+  }
+
+  // Función para mostrar el formulario de login
+  function showLoginForm() {
+    if (authStatusElement) {
+      authStatusElement.innerHTML = loginFormHtml;
+      
+      // Agregar event listener al formulario
+      const loginForm = document.getElementById('loginForm') as HTMLFormElement;
+      if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+      }
+    }
+  }
+
+  // Función para manejar el login
+  async function handleLogin(event: Event) {
+    event.preventDefault();
+
+    const usernameElement = document.getElementById('username') as HTMLInputElement;
+    const passwordElement = document.getElementById('password') as HTMLInputElement;
+
+    if (!usernameElement || !passwordElement) return;
+
+    const username = usernameElement.value.trim();
+    const password = passwordElement.value;
+
+    if (!username || !password) {
+      showLoginError('Por favor, completa todos los campos');
+      return;
+    }
+
+    // Mostrar estado de carga
+    if (authStatusElement) {
+      authStatusElement.innerHTML = `
+        <div class="loading-state text-center">
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto"></div>
+          <p class="mt-2 text-sm opacity-80">Iniciando sesión...</p>
+        </div>
+      `;
+    }
+
+    try {
+      const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoints.auth}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Login exitoso - mostrar información del usuario
+        showUserInfo(data.user);
+      } else {
+        showLoginError(data.message || 'Credenciales incorrectas');
+      }
+    } catch (error) {
+      console.error('Error durante el login:', error);
+      showLoginError('Error de conexión. Inténtalo de nuevo.');
+    }
+  }
+
+  // Función para mostrar errores de login
+  function showLoginError(message: string) {
+    showLoginForm();
+
+    // Agregar mensaje de error
+    if (authStatusElement) {
+      const authForm = authStatusElement.querySelector('.auth-form');
+      if (authForm) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'mt-2 p-2 bg-red-500/20 border border-red-400/30 rounded text-red-200 text-sm text-center';
+        errorDiv.textContent = message;
+        authForm.appendChild(errorDiv);
+
+        // Remover el error después de 5 segundos
+        setTimeout(() => {
+          if (errorDiv.parentNode) {
+            errorDiv.remove();
+          }
+        }, 5000);
+      }
+    }
+  }
+
+  // Función para mostrar error de conexión
+  function showConnectionError() {
+    if (authStatusElement) {
+      authStatusElement.innerHTML = `
+        <div class="error-message text-center">
+          <div class="text-red-400 mb-2">⚠️</div>
+          <p class="text-sm text-red-200 mb-3">Error de conexión</p>
+          <button onclick="checkAuthStatus()"
+            class="bg-yellow-600 hover:bg-yellow-700 text-white text-xs py-1 px-3 rounded transition-colors duration-200">
+            Reintentar
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  // Función para cerrar sesión
+  async function logout() {
+    try {
+      // Mostrar mensaje de cierre de sesión
+      if (authStatusElement) {
+        authStatusElement.innerHTML = `
+          <div class="loading-state text-center">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto"></div>
+            <p class="mt-2 text-sm opacity-80">Cerrando sesión...</p>
+          </div>
+        `;
+      }
+
+      // Llamar al endpoint de logout del servidor de auth
+      const response = await fetch(`${API_CONFIG.baseUrl}/auth`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        // Logout exitoso - mostrar formulario de login
+        showLoginForm();
+      } else {
+        console.warn('Error en logout:', response.status);
+        // Aún así mostrar el formulario de login
+        showLoginForm();
+      }
+
+    } catch (error) {
+      console.error('Error durante logout:', error);
+      // En caso de error, aún así mostrar formulario de login
+      showLoginForm();
+    }
+  }
+
+  // Función global para logout (accesible desde HTML)
+  (window as any).logout = logout;
+</script>

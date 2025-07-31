@@ -1,0 +1,72 @@
+---
+import BaseHead from "@/components/BaseHead.astro";
+import Footer from "@/components/Footer.astro";
+import Header from "@/components/Header.astro";
+import "@fontsource-variable/onest";
+import { SITE_TITLE, SITE_DESCRIPTION, SITE_LANG} from "../config";
+import type { AsignaturasData } from "@/types/asignaturas";
+import asignaturasData from "@/pages/asignaturas/asignaturas.json" assert { type: "json" };
+import "@/styles/main.scss";
+const {
+  title = SITE_TITLE,
+  description = SITE_DESCRIPTION,
+  ogType,
+} = Astro.props;
+
+// Castea el JSON al tipo definido
+const data: AsignaturasData = asignaturasData;
+
+// Obtén la ruta actual
+const currentPath = Astro.url.pathname;
+
+// Función para buscar el título dinámico en el JSON
+function findDynamicTitle(slug: string): string | null {
+  for (const asignaturaKey in data.asignaturas) {
+    const asignatura = data.asignaturas[asignaturaKey];
+    for (const objeto of asignatura.objetos_aprendizaje) {
+      // Coincidencia directa con el slug del objeto
+      if (objeto.slug === slug) {
+        return objeto.titulo ?? null; // Asegura que no devuelva undefined
+      }
+      // Coincidencia dentro de las pantallas, si existen
+      if (objeto.pantallas) {
+        for (const pantalla of objeto.pantallas) {
+          if (pantalla.slug === slug) {
+            return pantalla.titulo ?? null; // Asegura que no devuelva undefined
+          }
+        }
+      }
+    }
+  }
+  return null; // Si no se encuentra, devuelve null
+}
+
+// Busca el título dinámico si no se pasa como prop
+let dynamicTitle = title;
+if (title === SITE_TITLE) {
+  dynamicTitle = findDynamicTitle(currentPath) || SITE_TITLE;
+}
+---
+
+<!doctype html>
+<html lang={SITE_LANG}>
+  <head>
+    <base href={import.meta.env.BASE_URL} />
+    <BaseHead
+      title={dynamicTitle}
+      description={description}
+      ogType={ogType}
+    />
+ </head>
+  <body>
+    <Header title={SITE_TITLE} />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+  <script
+    is:inline
+    src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.0/flowbite.min.js"
+  ></script>
+</html>

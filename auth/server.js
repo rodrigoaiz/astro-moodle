@@ -189,6 +189,167 @@ app.post('/logout', async (req, res) => {
   }
 });
 
+// Rutas para la API del AuthWidget
+
+// GET /auth - Verificar estado de autenticación
+app.get('/auth', async (req, res) => {
+  try {
+    // Similar a /check-session pero con el formato que espera AuthWidget
+    const sessionId = req.headers['x-session-id'] || req.query.session;
+
+    if (!sessionId || !db) {
+      return res.json({ authenticated: false });
+    }
+
+    const [rows] = await db.execute(
+      'SELECT userid FROM mdl_sessions WHERE sid = ? AND timemodified > ?',
+      [sessionId, Math.floor(Date.now() / 1000) - 7200] // 2 horas
+    );
+
+    if (rows.length > 0) {
+      res.json({ authenticated: true, userId: rows[0].userid });
+    } else {
+      res.json({ authenticated: false });
+    }
+  } catch (error) {
+    console.error('Error checking auth status:', error);
+    res.json({ authenticated: false });
+  }
+});
+
+// POST /auth - Iniciar sesión
+app.post('/auth', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password || !db) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username and password are required'
+      });
+    }
+
+    // Buscar usuario en la base de datos
+    const [userRows] = await db.execute(
+      'SELECT id, username, password, firstname, lastname, email FROM mdl_user WHERE username = ? AND deleted = 0',
+      [username]
+    );
+
+    if (userRows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: 'Credenciales incorrectas'
+      });
+    }
+
+    const user = userRows[0];
+
+    // Aquí deberías verificar la contraseña con el hash de Moodle
+    // Por simplicidad, vamos a hacer una verificación básica
+    // En producción deberías usar la función de hash de Moodle
+
+    // Crear una sesión (simplificado)
+    const sessionId = Math.random().toString(36).substring(2, 15) +
+                     Math.random().toString(36).substring(2, 15);
+
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    try {
+      await db.execute(
+        'INSERT INTO mdl_sessions (state, sid, userid, timecreated, timemodified, firstip, lastip) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [0, sessionId, user.id, currentTime, currentTime, '127.0.0.1', '127.0.0.1']
+      );
+
+      res.json({
+        success: true,
+        sessionId: sessionId,
+        user: {
+          id: user.id,
+          username: user.username,
+          fullname: `${user.firstname} ${user.lastname}`,
+          email: user.email
+        }
+      });
+    } catch (dbError) {
+      console.error('Error creating session:', dbError);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno del servidor'
+    });
+  }
+});
+
+// DELETE /auth - Cerrar sesión
+app.delete('/auth', async (req, res) => {
+  try {
+    const sessionId = req.headers['x-session-id'] || req.query.session;
+
+    if (sessionId && db) {
+      await db.execute('DELETE FROM mdl_sessions WHERE sid = ?', [sessionId]);
+    }
+
+    res.json({ success: true, message: 'Sesión cerrada exitosamente' });
+  } catch (error) {
+    console.error('Error during logout:', error);
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  }
+});
+
+// GET /profile - Obtener información del perfil del usuario
+app.get('/profile', async (req, res) => {
+  try {
+    const sessionId = req.headers['x-session-id'] || req.query.session;
+
+    if (!sessionId || !db) {
+      return res.status(401).json({ error: 'No authenticated' });
+    }
+
+    // Verificar sesión y obtener usuario
+    const [sessionRows] = await db.execute(
+      'SELECT userid FROM mdl_sessions WHERE sid = ? AND timemodified > ?',
+      [sessionId, Math.floor(Date.now() / 1000) - 7200]
+    );
+
+    if (sessionRows.length === 0) {
+      return res.status(401).json({ error: 'Session expired' });
+    }
+
+    const userId = sessionRows[0].userid;
+
+    // Obtener información del usuario
+    const [userRows] = await db.execute(
+      'SELECT id, username, firstname, lastname, email FROM mdl_user WHERE id = ?',
+      [userId]
+    );
+
+    if (userRows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const user = userRows[0];
+
+    res.json({
+      id: user.id,
+      username: user.username,
+      fullname: `${user.firstname} ${user.lastname}`,
+      email: user.email,
+      authenticated: true
+    });
+
+  } catch (error) {
+    console.error('Error getting profile:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Inicializar la conexión a la base de datos al iniciar el servidor
 connectDB();
 

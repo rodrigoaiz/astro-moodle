@@ -1,0 +1,53 @@
+{
+  "main": [
+
+
+    {
+      "name": "Asignaturas",
+      "url": "",
+      "hasChildren": true,
+      "children": [
+        {
+          "name": "Matemáticas I",
+          "short": "M1",
+          "url": "/asignaturas/matematicas-1"
+        },
+        {
+          "name": "Matemáticas II",
+          "short": "M2",
+          "url": "/asignaturas/matematicas-2"
+        },
+        {
+          "name":"Matemáticas III",
+          "short": "M3",
+          "url": "/asignaturas/matematicas-3"
+        },
+        {
+          "name": "Matemáticas IV",
+          "short": "M4",
+          "url": "/asignaturas/matematicas-4"
+        },
+        {
+          "name": "Estadística y probabilidad",
+          "short": "EP",
+          "url": "/asignaturas/estadistica"
+        },
+        {
+          "name": "Cálculo diferencial e integral",
+          "short": "CD",
+          "url": "/asignaturas/calculo"
+        }
+      ]
+    }
+  ],
+  "footer": [
+    {
+      "name": "Acerca de",
+      "url": "/acerca-de"
+    },
+    {
+      "name": "Créditos",
+      "url": "/creditos"
+    }
+  ]
+}

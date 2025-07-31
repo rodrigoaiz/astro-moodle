@@ -1,0 +1,24 @@
+{
+  "main": [
+    {
+      "name": "facebook",
+      "icon": "bi:facebook",
+      "link": "https://www.facebook.com/portalacademico"
+    },
+    {
+      "name": "twitter",
+      "icon": "bi:twitter-x",
+      "link": "https://twitter.com/academico_cch"
+    },
+    {
+      "name": "youtube",
+      "icon": "bi:youtube",
+      "link": "https://www.youtube.com/user/portalacademicocch"
+    },
+    {
+      "name": "instagram",
+      "icon": "bi:instagram",
+      "link": "https://www.instagram.com/portalacademicocch"
+    }
+  ]
+}

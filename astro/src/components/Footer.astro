@@ -1,0 +1,81 @@
+---
+import Logo from "@/components/Logo.astro";
+import config from "@/config/config.json";
+import menu from "@/config/menu.json";
+import social from "@/config/social.json";
+const { footer }: { footer: { name: string; url: string }[] } = menu;
+import { Icon } from "astro-icon/components";
+import LogoUNAM from "@/components/LogoUNAM.astro";
+import LogoCCH from "@/components/LogoCCH.astro";
+import LogoPACCH from "@/components/LogoPACCH.astro";
+---
+
+<footer class="bg-lightblue mt-10">
+  <div class="container mx-auto text-darkblue">
+    <div class="flex flex-col md:flex-row justify-around items-center py-10">
+      <div class="text-center md:mb-0 md:text-left">
+        <div class="w-full flex justify-center md:mb-10">
+          <a href="/"><Logo class="h-10 md:h-14 hover:scale-110 transition-all ease-in-out" /></a>
+        </div>
+        <div class="grid grid-cols-3 gap-2 mt-4 items-center justify-center">
+          <a href="https://www.unam.mx/" target="_blank" rel="noreferrer"
+            ><LogoUNAM
+              class="size-10 fill-darkblue hover:fill-blue transition-all"
+            /></a
+          >
+          <a href="https://cch.unam.mx/" target="_blank" rel="noreferrer"
+            ><LogoCCH
+              class="size-10 fill-darkblue hover:fill-blue transition-all"
+            /></a
+          >
+          <a
+            href="https://portalacademico.cch.unam.mx/"
+            target="_blank"
+            rel="noreferrer"
+            ><LogoPACCH
+              class="md:h-7 fill-darkblue hover:fill-blue transition-all"
+            /></a
+          >
+        </div>
+      </div>
+      <div class="text-center md:mb-0">
+        <ul>
+          {
+            footer.map((menu) => (
+              <li class="m-3 inline-block">
+                <a class="hover:text-blue transition-all" href={menu.url}>
+                  {menu.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="text-center lg:mb-0 lg:mt-0 lg:text-right">
+        <ul>
+          {
+            social.main.map((socialItem) => (
+              <li class="m-3 inline-block">
+                <a
+                  class="hover:text-blue transition-all"
+                  href={socialItem.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-gray-300 hover:text-white transition-colors flex items-center gap-2"
+                >
+                  <Icon name={socialItem.icon} class="w-5 h-5" />
+                  {socialItem.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="border-t border-border py-7 border-dark">
+    <div class="container text-center text-dark mx-auto">
+      <p set:html={config.params.copyright} />
+    </div>
+  </div>
+</footer>

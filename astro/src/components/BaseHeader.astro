@@ -1,0 +1,45 @@
+---
+import Logo from "@/components/Logo.astro";
+import menu from "@/config/menu.json";
+import AuthWidget from "@/components/AuthWidget.astro";
+const { main }: { main: { name: string; url: string }[] } = menu;
+---
+
+<header class="bg-white shadow-md sticky top-0 z-50">
+  <div class="container mx-auto px-4">
+    <div class="flex justify-between items-center py-4">
+      <!-- Logo -->
+      <div class="flex items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <Logo class="h-10 md:h-12 hover:scale-105 transition-transform duration-200" />
+        </a>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="hidden md:flex items-center space-x-8">
+        {main.map((item) => (
+          <a
+            href={item.url}
+            class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
+          >
+            {item.name}
+          </a>
+        ))}
+      </nav>
+
+      <!-- Auth Widget -->
+      <div class="flex items-center">
+        <AuthWidget />
+      </div>
+
+      <!-- Mobile Menu Button (for future implementation) -->
+      <div class="md:hidden">
+        <button class="text-gray-700 hover:text-blue-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
