@@ -39,7 +39,9 @@ const MoodleWidget: React.FC<MoodleWidgetProps> = ({
 
       if (authResponse.ok) {
         const authData = await authResponse.json();
+        console.log('MoodleWidget: Auth check response:', authData);
         if (authData.authenticated) {
+          console.log('MoodleWidget: User is authenticated locally');
           setAuthState('authenticated');
           if (checkIntervalRef.current) {
             clearInterval(checkIntervalRef.current);
@@ -140,10 +142,15 @@ const MoodleWidget: React.FC<MoodleWidgetProps> = ({
     // Event listener para cambios en localStorage (sincronización entre pestañas)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'moodle_auth_changed' && e.newValue === 'true') {
-        console.log('Detected auth change from another tab/window');
+        console.log('MoodleWidget: Detected auth change from localStorage');
         checkAuthentication();
         // Limpiar el flag
         localStorage.removeItem('moodle_auth_changed');
+      }
+      // IMPORTANTE: También detectar cambios en el sessionId directamente
+      if (e.key === 'moodle_session_id') {
+        console.log('MoodleWidget: Detected session ID change, checking auth');
+        setTimeout(() => checkAuthentication(), 100);
       }
     };
 
