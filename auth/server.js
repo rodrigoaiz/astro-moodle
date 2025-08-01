@@ -270,13 +270,13 @@ app.post('/auth', async (req, res) => {
     // NOTA CRÍTICA: No usamos hashes locales, sino que autenticamos contra Moodle real
     // Esto fue la clave para resolver el problema de sincronización
     let passwordValid = false;
-    
+
     try {
       const storedHash = user.password;
-      
+
       console.log(`🔐 Verifying password for user: ${username}`);
       console.log(`🔐 Attempting complete Moodle login flow...`);
-      
+
       // PASO 2A: CSRF Token Management
       // Moodle requiere tokens CSRF para prevenir ataques
       // Tuvimos que implementar esto cuando descubrimos que Moodle lo requiere
@@ -286,23 +286,23 @@ app.post('/auth', async (req, res) => {
         // Ahora usamos la URL real que ve el navegador
         const moodleExternalUrl = 'http://132.248.218.76:4324/learning';
         console.log(`🌐 Using external Moodle URL: ${moodleExternalUrl}`);
-        
+
         // Obtener la página de login para extraer el token CSRF
         const getLoginPageResponse = await fetch(`${moodleExternalUrl}/login/index.php`);
         const loginPageHtml = await getLoginPageResponse.text();
-        
+
         // Extraer el token logintoken del HTML usando regex
         // Este token es obligatorio para que Moodle acepte el login
         const tokenMatch = loginPageHtml.match(/name="logintoken"\s+value="([^"]+)"/);
         const logintoken = tokenMatch ? tokenMatch[1] : '';
-        
+
         console.log(`🔑 Extracted logintoken: ${logintoken.substring(0, 10)}...`);
-        
+
         // Extraer cookies de la respuesta inicial
         // Estas cookies son necesarias para mantener la sesión durante el flujo CSRF
         const setCookieHeaders = getLoginPageResponse.headers.get('set-cookie');
         console.log(`🍪 Initial cookies: ${setCookieHeaders}`);
-        
+
         // PASO 2B: Realizar el login con el token CSRF
         const loginData = new URLSearchParams();
         loginData.append('username', username);
@@ -310,9 +310,9 @@ app.post('/auth', async (req, res) => {
         if (logintoken) {
           loginData.append('logintoken', logintoken);
         }
-        
+
         console.log(`🔄 Attempting login with CSRF token to external URL...`);
-        
+
         const loginResponse = await fetch(`${moodleExternalUrl}/login/index.php`, {
           method: 'POST',
           body: loginData,
@@ -322,22 +322,22 @@ app.post('/auth', async (req, res) => {
           },
           redirect: 'manual' // IMPORTANTE: No seguir redirects automáticamente
         });
-        
+
         console.log(`🔄 Login response status: ${loginResponse.status}`);
         const location = loginResponse.headers.get('location');
         console.log(`🔄 Redirect location: ${location}`);
-        
+
         // PASO 2C: Interpretar el resultado del login
         // ESTO FUE LO MÁS COMPLICADO: Moodle no da respuestas simples de éxito/error
         // Tuvimos que interpretar los diferentes tipos de redirects
         if (loginResponse.status === 302 || loginResponse.status === 303) {
           if (location && location.includes('/login/index.php')) {
-            // Si incluye testsession, significa que las credenciales son válidas 
+            // Si incluye testsession, significa que las credenciales son válidas
             // pero Moodle necesita verificar que las cookies funcionan
             if (location.includes('testsession=')) {
               console.log(`🔄 Moodle requires session test - credentials are valid for: ${username}`);
               passwordValid = true;
-              
+
               // Extraer la cookie de sesión del login exitoso
               // Esta es la sesión REAL de Moodle que necesitamos
               const loginCookies = loginResponse.headers.get('set-cookie');
@@ -357,7 +357,7 @@ app.post('/auth', async (req, res) => {
             // Redirect al dashboard = login exitoso directo
             passwordValid = true;
             console.log(`✅ Moodle login successful for: ${username}`);
-            
+
             // Extraer la cookie de sesión del login exitoso
             const loginCookies = loginResponse.headers.get('set-cookie');
             if (loginCookies && loginCookies.includes('MoodleSession=')) {
@@ -375,7 +375,7 @@ app.post('/auth', async (req, res) => {
           console.log(`❌ Unexpected response status: ${loginResponse.status}`);
           passwordValid = false;
         }
-        
+
       } catch (apiError) {
         console.error(`❌ Moodle login flow error for ${username}:`, apiError.message);
         passwordValid = false;
@@ -383,7 +383,7 @@ app.post('/auth', async (req, res) => {
     } catch (error) {
       console.error(`❌ Error during password verification for ${username}:`, error);
     }
-    
+
     // PASO 3: Rechazar si las credenciales no son válidas
     if (!passwordValid) {
       console.log(`❌ Authentication failed for user: ${username}`);
@@ -396,18 +396,18 @@ app.post('/auth', async (req, res) => {
     console.log(`🎯 About to try Moodle authentication for user: ${username}`);
 
     // PASO 4: Usar la sesión real de Moodle que obtuvimos durante la validación
-    // ESTO FUE CLAVE: En lugar de crear sesiones artificiales, 
+    // ESTO FUE CLAVE: En lugar de crear sesiones artificiales,
     // usamos las sesiones REALES creadas por Moodle
     if (passwordValid) {
       console.log('🔄 Using real Moodle session from validation...');
-      
+
       // Buscar la sesión de Moodle que se creó durante la validación
       // Ordenamos por timemodified DESC para obtener la más reciente
       const [moodleSessions] = await db.execute(
         'SELECT sid FROM mdl_sessions WHERE userid = ? ORDER BY timemodified DESC LIMIT 1',
         [user.id]
       );
-      
+
       let finalSessionId;
       if (moodleSessions.length > 0) {
         // ¡Perfecto! Usar la sesión real de Moodle
@@ -418,7 +418,7 @@ app.post('/auth', async (req, res) => {
         finalSessionId = generateMoodleSessionId();
         const currentTime = Math.floor(Date.now() / 1000);
         const sessdata = createMoodleSessionData(user.id, username);
-        
+
         console.log(`🔄 Creating fallback session: ${finalSessionId}`);
         await db.execute(
           'INSERT INTO mdl_sessions (state, sid, userid, sessdata, timecreated, timemodified, firstip, lastip) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
@@ -427,7 +427,7 @@ app.post('/auth', async (req, res) => {
       }
 
       console.log(`✅ Authentication successful: ${username} (Session: ${finalSessionId})`);
-      
+
       // PASO 5: Retornar el sessionId real al frontend
       // El AuthWidget usará este sessionId para establecer cookies
       res.json({
@@ -520,7 +520,7 @@ app.get('/profile', async (req, res) => {
   try {
     console.log('📋 GET /profile called');
     console.log('📋 Headers:', JSON.stringify(req.headers, null, 2));
-    
+
     const sessionId = req.headers['x-session-id'] || req.query.session;
     console.log(`📋 Session ID: ${sessionId}`);
 

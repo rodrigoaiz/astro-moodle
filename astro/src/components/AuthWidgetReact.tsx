@@ -200,11 +200,11 @@ const AuthWidgetReact: React.FC = () => {
         setAuthState('logged-in');
         setUserData(data.user);
         setLoginError('');
-        
+
         // Notificar cambio pero NO verificar auth status inmediatamente
         // para evitar conflictos con la sesión recién creada
         notifyAuthChange();
-        
+
         console.log('AuthWidget: Login completed successfully');
       } else {
         console.error('AuthWidget: Login failed:', data.message);
@@ -339,7 +339,7 @@ const AuthWidgetReact: React.FC = () => {
 
       if (event.data.type === 'MOODLE_AUTH_CHANGED' || event.data.type === 'MOODLE_LOGIN_SUCCESS') {
         console.log('AuthWidget received auth change message:', event.data.type);
-        
+
         // Si es un mensaje de login exitoso, no verificar inmediatamente
         if (event.data.type === 'MOODLE_LOGIN_SUCCESS') {
           setIsLoggingIn(false);
@@ -394,7 +394,8 @@ const AuthWidgetReact: React.FC = () => {
   // Estado no autenticado - mostrar formulario de login
   if (authState === 'logged-out') {
     return (
-      <div className="auth-widget card p-6 min-w-[320px] animate-float">
+      <div className="card fixed
+      z-[11111] right-1 top-1 p-6 max-w-[320px] animate-float">
         <div className="text-center">
           <div className="text-center mb-6">
             <h3 className="text-2xl font-bold text-white mb-2">¡Hola! 👋</h3>
@@ -424,7 +425,7 @@ const AuthWidgetReact: React.FC = () => {
             <button
               type="submit"
               disabled={isLoggingIn}
-              className="btn btn-accent w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn bg-primary-dark w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoggingIn ? (
                 <>
@@ -476,14 +477,14 @@ const AuthWidgetReact: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          <a
+          {/* <a
             href="/learning"
             className="btn btn-primary w-full"
             target="_blank"
             rel="noopener noreferrer"
           >
             🎓 Ir a Moodle
-          </a>
+          </a> */}
 
           <button
             onClick={handleLogout}

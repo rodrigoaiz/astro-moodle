@@ -19,20 +19,17 @@ const { main }: { main: { name: string; url: string }[] } = menu;
 
       <!-- Navigation Menu -->
       <nav class="hidden lg:flex items-center space-x-6">
-        {main.map((item) => (
+<!--         {main.map((item) => (
           <a
             href={item.url}
             class="text-white/80 hover:text-yellow-400 font-medium transition-colors duration-200 hover:scale-105 transform"
           >
             {item.name}
           </a>
-        ))}
+        ))} -->
       </nav>
 
-      <!-- Auth Widget -->
-      <div class="flex items-center">
-        <AuthWidgetReact client:load />
-      </div>
+
 
       <!-- Mobile Menu Button -->
       <div class="lg:hidden">
@@ -44,4 +41,5 @@ const { main }: { main: { name: string; url: string }[] } = menu;
       </div>
     </div>
   </div>
+  <AuthWidgetReact client:load />
 </header>

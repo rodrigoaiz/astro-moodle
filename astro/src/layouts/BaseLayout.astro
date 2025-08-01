@@ -1,74 +1,33 @@
 ---
+import BaseHead from "@/components/BaseHead.astro";
 import BaseHeader from "@/components/BaseHeader.astro";
 import Footer from "@/components/Footer.astro";
-import "../styles/global.css";
+import { SITE_TITLE, SITE_DESCRIPTION, SITE_LANG} from "../config";
+import "@/styles/global.css";
 
 export interface Props {
   title?: string;
   description?: string;
 }
-
-const { title = "Plataforma Educativa", description = "Sistema integrado de aprendizaje con Astro y Moodle" } = Astro.props;
+const {
+  title,
+  description,
+} = Astro.props;
 ---
 
-<!DOCTYPE html>
-<html lang="es">
+<!doctype html>
+<html lang={SITE_LANG}>
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title}</title>
-    <meta name="description" content={description}>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <slot name="head" />
-  </head>
+    <BaseHead
+      title={title || SITE_TITLE}
+      description={ description || SITE_DESCRIPTION }
+    />
+ </head>
   <body class="min-h-screen flex flex-col antialiased bg-dots">
     <BaseHeader />
-    <main class="flex-1 relative">
+    <main>
       <slot />
     </main>
     <Footer />
-
-    <!-- Estilos globales para animaciones y efectos -->
-    <style is:global>
-      /* Estilos para animaciones y transiciones */
-      .loading-spinner {
-        animation: fadeIn 0.3s ease-in;
-      }
-
-      .auth-form, .user-info, .error-message, .loading-state {
-        animation: slideIn 0.3s ease-out;
-      }
-
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-
-      @keyframes slideIn {
-        from {
-          opacity: 0;
-          transform: translateY(-10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      /* Hover effects para las feature cards */
-      .feature-card {
-        transition: all 0.3s ease;
-      }
-
-      .feature-card:hover {
-        transform: translateY(-5px);
-      }
-
-      /* Estilos para el widget de autenticación */
-      .auth-widget {
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-      }
-    </style>
   </body>
 </html>

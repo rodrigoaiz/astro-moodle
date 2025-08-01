@@ -6,7 +6,7 @@
    Paleta: Análogos + Complementarios
    ======================================== */
 
-:root {
+@theme {
   /* 🟣 Colores principales - Morados */
   --color-primary: #4e1a6e;
   --color-primary-light: #6b2d8a;
@@ -47,6 +47,12 @@
   --shadow-card: 0 10px 30px rgba(78, 26, 110, 0.2);
   --shadow-button: 0 5px 15px rgba(78, 26, 110, 0.3);
   --backdrop-blur: backdrop-filter: blur(10px);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+@layer components {
 }
 footer {
   background: var(--gradient-primary);
@@ -247,3 +253,37 @@ body {
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }
+
+      /* Estilos para animaciones y transiciones */
+      .loading-spinner {
+        animation: fadeIn 0.3s ease-in;
+      }
+
+      .auth-form, .user-info, .error-message, .loading-state {
+        animation: slideIn 0.3s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Hover effects para las feature cards */
+      .feature-card {
+        transition: all 0.3s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+      }
