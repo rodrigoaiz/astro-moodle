@@ -80,11 +80,20 @@ const AuthWidgetReact: React.FC = () => {
 
           if (profileResponse.ok) {
             const profileData = await profileResponse.json();
+            console.log('AuthWidget: Profile data received:', profileData);
             setAuthState('logged-in');
             setUserData(profileData);
             return;
+          } else {
+            console.error('AuthWidget: Profile request failed:', profileResponse.status);
+            // Si falla el perfil, pero está autenticado, usar datos básicos
+            setAuthState('logged-in');
+            setUserData({ authenticated: true, name: 'Usuario' });
+            return;
           }
         }
+      } else {
+        console.log('AuthWidget: Auth response not OK:', authResponse.status);
       }
 
       console.log('AuthWidget: No local auth, checking Moodle session...');
@@ -156,12 +165,47 @@ const AuthWidgetReact: React.FC = () => {
         // Guardar sessionId en localStorage
         if (data.sessionId) {
           localStorage.setItem('moodle_session_id', data.sessionId);
+
+          // Establecer cookie de sesión de Moodle usando el endpoint del servidor
+          try {
+            console.log('AuthWidget: Setting Moodle session cookie via server...');
+            const cookieResponse = await fetch(`${API_CONFIG.baseUrl}/set-session-cookie`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+              body: JSON.stringify({ sessionId: data.sessionId }),
+            });
+
+            if (cookieResponse.ok) {
+              console.log('AuthWidget: MoodleSession cookie set successfully via server');
+            } else {
+              console.error('AuthWidget: Failed to set cookie via server');
+            }
+          } catch (error) {
+            console.error('AuthWidget: Error setting cookie via server:', error);
+          }
+
+          // También establecer cookie directamente como fallback
+          try {
+            document.cookie = `MoodleSession=${data.sessionId}; path=/; SameSite=Lax; max-age=7200`;
+            console.log('AuthWidget: Set MoodleSession cookie directly:', data.sessionId);
+          } catch (error) {
+            console.error('AuthWidget: Error setting cookie directly:', error);
+          }
         }
 
+        // Actualizar estado inmediatamente con datos del login
         setAuthState('logged-in');
         setUserData(data.user);
         setLoginError('');
+        
+        // Notificar cambio pero NO verificar auth status inmediatamente
+        // para evitar conflictos con la sesión recién creada
         notifyAuthChange();
+        
+        console.log('AuthWidget: Login completed successfully');
       } else {
         console.error('AuthWidget: Login failed:', data.message);
         setLoginError(data.message || 'Error de autenticación');
@@ -204,6 +248,14 @@ const AuthWidgetReact: React.FC = () => {
 
       // Limpiar datos locales
       localStorage.removeItem('moodle_session_id');
+
+      // Limpiar cookie de sesión de Moodle
+      try {
+        document.cookie = 'MoodleSession=; path=/; domain=132.248.218.76; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        console.log('AuthWidget: Cleared MoodleSession cookie');
+      } catch (error) {
+        console.error('AuthWidget: Error clearing cookie:', error);
+      }
 
       // Forzar limpieza de cookies y almacenamiento local
       try {
@@ -259,18 +311,26 @@ const AuthWidgetReact: React.FC = () => {
       checkAuthStatus();
     }
 
-    // Verificar cada 60 segundos para mantener la sesión sincronizada
-    const interval = setInterval(checkAuthStatus, 60000);
+    // Verificar cada 2 minutos para mantener la sesión sincronizada
+    // (reducido de 60 segundos para ser menos agresivo)
+    const interval = setInterval(checkAuthStatus, 120000);
 
     // Event listeners para sincronización
     const handleFocus = () => {
-      checkAuthStatus();
+      // Solo verificar en focus si han pasado al menos 30 segundos desde la última verificación
+      const lastCheck = (window as any)._lastAuthCheck || 0;
+      const now = Date.now();
+      if (now - lastCheck > 30000) {
+        (window as any)._lastAuthCheck = now;
+        checkAuthStatus();
+      }
     };
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'moodle_auth_changed' && e.newValue === 'true') {
         console.log('AuthWidget detected auth change from another component');
-        checkAuthStatus();
+        // Delay para evitar race conditions
+        setTimeout(() => checkAuthStatus(), 1000);
       }
     };
 
@@ -279,16 +339,18 @@ const AuthWidgetReact: React.FC = () => {
 
       if (event.data.type === 'MOODLE_AUTH_CHANGED' || event.data.type === 'MOODLE_LOGIN_SUCCESS') {
         console.log('AuthWidget received auth change message:', event.data.type);
-        checkAuthStatus();
-
-        // Si es un mensaje de login exitoso, también actualizar el estado inmediatamente
+        
+        // Si es un mensaje de login exitoso, no verificar inmediatamente
         if (event.data.type === 'MOODLE_LOGIN_SUCCESS') {
           setIsLoggingIn(false);
-          // Dar un momento para que se procese la autenticación
+          // Dar más tiempo para que se procese la autenticación
           setTimeout(() => {
             checkAuthStatus();
             notifyAuthChange();
-          }, 500);
+          }, 2000);
+        } else {
+          // Para otros cambios, verificar con delay
+          setTimeout(() => checkAuthStatus(), 1000);
         }
       }
     };

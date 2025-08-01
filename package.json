@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "unix-crypt-td-js": "^1.1.4"
+  }
+}

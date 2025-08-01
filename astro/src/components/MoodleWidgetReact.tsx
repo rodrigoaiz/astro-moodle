@@ -42,6 +42,12 @@ const MoodleWidget: React.FC<MoodleWidgetProps> = ({
         console.log('MoodleWidget: Auth check response:', authData);
         if (authData.authenticated) {
           console.log('MoodleWidget: User is authenticated locally');
+
+          // IMPORTANTE: Establecer la cookie de sesión de Moodle antes de cargar el iframe
+          if (sessionId) {
+            await setMoodleSessionCookie(sessionId);
+          }
+
           setAuthState('authenticated');
           if (checkIntervalRef.current) {
             clearInterval(checkIntervalRef.current);
@@ -89,6 +95,20 @@ const MoodleWidget: React.FC<MoodleWidgetProps> = ({
     }
   };
 
+  // Función para establecer la cookie de sesión de Moodle
+  const setMoodleSessionCookie = async (sessionId: string) => {
+    try {
+      console.log('MoodleWidget: Setting Moodle session cookie:', sessionId);
+
+      // Establecer la cookie para el dominio de producción directamente
+      document.cookie = `MoodleSession=${sessionId}; path=/; domain=132.248.218.76; SameSite=Lax; max-age=7200`;
+      console.log('MoodleWidget: Cookie set successfully');
+
+    } catch (error) {
+      console.error('Error setting Moodle session cookie:', error);
+    }
+  };
+
   const handleLoginClick = (e: React.MouseEvent) => {
     e.preventDefault();
     console.log('MoodleWidget: Login requested - directing user to login form');
@@ -106,8 +126,15 @@ const MoodleWidget: React.FC<MoodleWidgetProps> = ({
     }
   };
 
-  const refreshContent = () => {
+  const refreshContent = async () => {
     if (authState === 'authenticated') {
+      const sessionId = localStorage.getItem('moodle_session_id');
+
+      // Establecer cookies antes de refrescar
+      if (sessionId) {
+        await setMoodleSessionCookie(sessionId);
+      }
+
       setIframeLoaded(false);
       // Trigger iframe reload by changing src
       const iframe = document.querySelector('#moodle-iframe-react') as HTMLIFrameElement;
@@ -150,17 +177,30 @@ const MoodleWidget: React.FC<MoodleWidgetProps> = ({
       // IMPORTANTE: También detectar cambios en el sessionId directamente
       if (e.key === 'moodle_session_id') {
         console.log('MoodleWidget: Detected session ID change, checking auth');
-        setTimeout(() => checkAuthentication(), 100);
+        setTimeout(async () => {
+          const newSessionId = e.newValue;
+          if (newSessionId) {
+            await setMoodleSessionCookie(newSessionId);
+          }
+          checkAuthentication();
+        }, 100);
       }
     };
 
     // Event listener para postMessage (desde popup de login o AuthWidget)
-    const handleMessage = (event: MessageEvent) => {
+    const handleMessage = async (event: MessageEvent) => {
       // Verificar origen por seguridad
       if (event.origin !== window.location.origin) return;
 
       if (event.data.type === 'MOODLE_LOGIN_SUCCESS' || event.data.type === 'MOODLE_AUTH_CHANGED') {
         console.log('Received auth change message:', event.data.type);
+
+        // Establecer cookies si hay una nueva sesión
+        const sessionId = localStorage.getItem('moodle_session_id');
+        if (sessionId) {
+          await setMoodleSessionCookie(sessionId);
+        }
+
         checkAuthentication();
       }
     };
@@ -177,6 +217,14 @@ const MoodleWidget: React.FC<MoodleWidgetProps> = ({
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('message', handleMessage);
     };
+  }, [authState]);
+
+  // Effect adicional para establecer cookies al montar el componente si ya hay sesión
+  useEffect(() => {
+    const sessionId = localStorage.getItem('moodle_session_id');
+    if (sessionId && authState === 'authenticated') {
+      setMoodleSessionCookie(sessionId);
+    }
   }, [authState]);
 
   const handleIframeLoad = () => {
