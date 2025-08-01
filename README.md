@@ -1,46 +1,67 @@
 # Astro + Moodle Integration Platform
 
-Una plataforma educativa moderna que integra un frontend desarrollado en Astro con Moodle LMS, utilizando Docker para una implementación robusta y escalable.
+Una plataforma educativa moderna que integra un frontend desarrollado en Astro con Moodle LMS, implementando autenticación sincronizada y widgets interactivos para una experiencia de usuario superior.
 
-## 🚀 Características
+## 🚀 Características Principales
 
-- **Frontend moderno**: Interfaz desarrollada en Astro para mejor rendimiento
-- **Widget de autenticación integrado**: Widget flotante que muestra estado de sesión en tiempo real
-- **LMS robusto**: Moodle 4.3.3 para gestión de aprendizaje
-- **Autenticación integrada**: Sistema de autenticación unificado entre frontend y Moodle
-- **UX mejorada**: Experiencia de usuario fluida sin redirecciones innecesarias
-- **API RESTful**: Endpoints para verificación de sesiones y gestión de usuarios
-- **Arquitectura en contenedores**: Docker Compose para fácil despliegue
-- **Proxy inteligente**: Nginx para enrutamiento y balanceo
-- **Base de datos optimizada**: MariaDB para almacenamiento confiable
-- **Administración web**: Adminer para gestión de base de datos
+- **🎨 Frontend moderno**: Interfaz desarrollada en Astro con diseño responsive y gradientes modernos
+- **🔐 Autenticación sincronizada**: Sistema de login unificado con validación real contra Moodle
+- **📱 Widget de autenticación**: Widget flotante en tiempo real con estados dinámicos
+- **🖼️ Widget de contenido Moodle**: Integración directa de contenido Moodle en el frontend
+- **🛡️ Seguridad robusta**: Autenticación con tokens CSRF y validación completa
+- **🌐 LMS completo**: Moodle 4.3.3 configurado y optimizado
+- **⚡ API RESTful**: Endpoints seguros para gestión de sesiones y usuarios
+- **🐳 Arquitectura en contenedores**: Docker Compose para despliegue simplificado
+- **🔄 Proxy inteligente**: Nginx configurado para enrutamiento y balanceo
+- **💾 Base de datos confiable**: MariaDB con persistencia y backups automáticos
 
-## 📋 Requisitos Previos
+## 📋 Requisitos del Sistema
 
+**Software base:**
 - Docker Engine 20.10+
 - Docker Compose 2.0+
-- Puerto 4324 disponible (configurable)
-- Puerto 4325 disponible (configurable)
+- 4GB RAM mínimo (8GB recomendado)
+- 20GB espacio en disco
 
-Ideal para integrar un sitio institucional moderno con un LMS sin necesidad de configuraciones complejas manuales.
+**Puertos requeridos:**
+- Puerto 4324 (HTTP principal, configurable)
+- Puerto 4325 (Adminer, configurable)
 
-## 🏗️ Arquitectura
+**Compatible con:**
+- Linux (Ubuntu 20.04+, RHEL 8+, Debian 11+)
+- macOS 11+ con Docker Desktop
+- Windows 10+ con Docker Desktop y WSL2
 
-```
+## 🏗️ Arquitectura del Sistema
+
+La plataforma utiliza una arquitectura de microservicios con 6 contenedores Docker:
+
+```text
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Nginx Proxy   │────│   Astro App     │    │   Auth Service  │
-│   Port: 4324    │    │   Port: 3000    │    │   Port: 3000    │
+│   Puerto: 4324  │    │   Puerto: 3000  │    │   Puerto: 3000  │
+│   (Balanceador) │    │   (Frontend)    │    │   (API Auth)    │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          ├───────────────────────┼───────────────────────┼──────────
-         │              Docker Network (172.18.0.0/16)  │
+         │              Docker Network (astro-moodle)    │
          ├───────────────────────┼───────────────────────┘
          ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Moodle LMS    │    │   MariaDB       │    │   Adminer       │
-│   Port: 8080    │    │   Port: 3306    │    │   Port: 4325    │
+│   Puerto: 8080  │    │   Puerto: 3306  │    │   Puerto: 4325  │
+│   (Bitnami)     │    │   (Database)    │    │   (DB Admin)    │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
+
+### Componentes:
+
+- **Nginx**: Proxy reverso que maneja enrutamiento (`/` → Astro, `/learning/` → Moodle, `/api/` → Auth)
+- **Astro**: Frontend moderno con widgets interactivos de autenticación y contenido
+- **Auth Service**: API Node.js que valida sesiones reales de Moodle con tokens CSRF
+- **Moodle**: LMS completo (Bitnami 4.3.3) con configuración personalizada
+- **MariaDB**: Base de datos con tabla de sesiones y usuarios sincronizada
+- **Adminer**: Interface web para administración de base de datos
 
 ## 🚀 Instalación y Configuración
 
@@ -83,111 +104,81 @@ La instalación estará completa cuando todos los servicios muestren estado "hea
 docker compose ps
 ```
 
-## 🌐 Acceso a la Plataforma
+## 🌐 URLs y Acceso a la Plataforma
+
+Una vez levantados los servicios, la plataforma estará disponible en:
 
 ### URLs Principales
 
-- **Frontend Principal**: `http://localhost:4324/`
-- **Moodle LMS**: `http://localhost:4324/learning/`
-- **API de Autenticación**: `http://localhost:4324/api/`
-- **Adminer (Base de Datos)**: `http://localhost:4325/`
-
-### API de Autenticación
-
-La plataforma incluye una API RESTful para gestión de autenticación:
-
-| Endpoint | Método | Descripción | Respuesta |
-|----------|--------|-------------|-----------|
-| `/api/health` | GET | Estado del servicio de autenticación | `{"status":"ok","database":"connected"}` |
-| `/api/check-session` | GET | Verificar si el usuario tiene sesión activa | `{"loggedIn":true/false,"user":{...}}` |
-| `/api/user` | GET | Obtener información del usuario actual | `{"id":1,"username":"admin",...}` |
-| `/api/logout` | POST | Cerrar sesión del usuario | `{"success":true}` |
-
-**Ejemplos de uso:**
-
-```bash
-# Verificar estado del servicio
-curl http://localhost:4324/api/health
-
-# Verificar sesión (requiere cookies de Moodle)
-curl -b "MoodleSession=..." http://localhost:4324/api/check-session
-
-# Obtener información del usuario
-curl -b "MoodleSession=..." http://localhost:4324/api/user
-
-# Cerrar sesión
-curl -X POST http://localhost:4324/api/logout
-```
-
-**Respuestas de ejemplo:**
-
-```json
-// GET /api/check-session (usuario autenticado)
-{
-  "loggedIn": true,
-  "user": {
-    "id": 2,
-    "username": "user",
-    "name": "Usuario Demo",
-    "email": "user@example.com"
-  },
-  "sessionInfo": {
-    "created": "2025-07-30T17:30:00.000Z",
-    "lastActivity": "2025-07-30T17:55:00.000Z"
-  }
-}
-
-// GET /api/check-session (usuario no autenticado)
-{
-  "loggedIn": false,
-  "message": "No session cookie found"
-}
-```
+- **🏠 Página Principal**: `http://localhost:4324/`
+- **📚 Moodle LMS**: `http://localhost:4324/learning/`
+- **🔐 Login Moodle**: `http://localhost:4324/learning/login/`
+- **🔧 API de Autenticación**: `http://localhost:4324/api/`
+- **💾 Adminer (Base de Datos)**: `http://localhost:4325/`
 
 ### Credenciales de Acceso
 
 **Moodle Administrador:**
+
 - Usuario: `admin`
 - Contraseña: `admin123`
 
 **Base de Datos (Adminer):**
+
 - Sistema: `MySQL`
 - Servidor: `db`
 - Usuario: `moodle`
 - Contraseña: `moodle_pass`
 - Base de datos: `moodle`
 
-## 📁 Estructura del Proyecto
+## 🔐 Sistema de Autenticación Avanzado
+
+### Características Principales
+
+- **✅ Autenticación real**: Validación completa contra Moodle con tokens CSRF
+- **🔄 Sincronización automática**: Estado de sesión compartido entre frontend y Moodle
+- **🛡️ Seguridad robusta**: Sin bypasses, validación completa de credenciales
+- **📱 Widget interactivo**: Interface visual en tiempo real del estado de autenticación
+- **🎯 UX optimizada**: Flujo de login sin redirecciones innecesarias
+
+### Flujo de Autenticación
 
 ```text
-```text
-.
-├── astro                 # Código fuente y Dockerfile del frontend Astro
-├── auth                  # Código fuente y Dockerfile del servicio de autenticación
-├── data                  # (Opcional) Scripts SQL iniciales para la DB
-├── docker-compose.yml    # Orquestación de contenedores Docker
-├── logs                  # Logs persistentes de Nginx (acceso y errores)
-├── moodle-extra-config   # Configuración adicional para Moodle (wwwroot, proxy)
-└── nginx                 # Configuración personalizada de Nginx
+1. Usuario visita página principal (localhost:4324)
+   ↓
+2. Widget de autenticación verifica estado automáticamente
+   ↓
+3. Si no está autenticado: Botón "Iniciar Sesión en Moodle"
+   ↓
+4. Usuario hace login real en Moodle (/learning/login/)
+   ↓
+5. Después del login, regresa a la página principal
+   ↓
+6. Click en "Verificar Sesión" actualiza el estado
+   ↓
+7. Widget muestra información del usuario autenticado
 ```
 
-## 🎯 Widget de Autenticación Integrado
+### API Endpoints
 
-### Descripción
+| Endpoint | Método | Descripción | Respuesta |
+|----------|--------|-------------|-----------|
+| `/api/health` | GET | Estado del servicio | `{"status":"ok","database":"connected"}` |
+| `/api/auth` | GET | Verificar sesión activa | `{"authenticated":true/false,"user":{...}}` |
+| `/api/auth` | POST | Autenticar usuario | `{"success":true,"sessionId":"..."}` |
+| `/api/logout` | POST | Cerrar sesión | `{"success":true}` |
 
-La plataforma incluye un **widget de autenticación flotante** en la página principal que proporciona una experiencia de usuario mejorada y visibilidad en tiempo real del estado de autenticación.
+## 🎨 Widgets Interactivos
 
-### Características del Widget
+### Widget de Autenticación
 
-- **📍 Ubicación**: Esquina superior derecha de la página principal
-- **🎨 Diseño**: Widget flotante con gradientes modernos y animaciones suaves
-- **📱 Responsive**: Se adapta automáticamente a dispositivos móviles y desktop
-- **⚡ Tiempo real**: Verifica automáticamente el estado de sesión al cargar la página
+**Ubicación**: Esquina superior derecha de la página principal
 
-### Estados del Widget
+**Estados dinámicos**:
 
 #### 🔄 Estado de Carga
-```
+
+```text
 ┌─────────────────────┐
 │  Verificando        │
 │  sesión...          │
@@ -195,7 +186,8 @@ La plataforma incluye un **widget de autenticación flotante** en la página pri
 ```
 
 #### 🔐 Usuario No Autenticado
-```
+
+```text
 ┌─────────────────────┐
 │  Iniciar Sesión     │
 │  en Moodle          │
@@ -205,7 +197,8 @@ La plataforma incluye un **widget de autenticación flotante** en la página pri
 ```
 
 #### ✅ Usuario Autenticado
-```
+
+```text
 ┌─────────────────────┐
 │  👤 J               │
 │  Juan Pérez         │
@@ -215,238 +208,291 @@ La plataforma incluye un **widget de autenticación flotante** en la página pri
 └─────────────────────┘
 ```
 
-### Flujo de Usuario
+### Widget de Contenido Moodle
 
-1. **Llegada a la página**: Widget automáticamente verifica estado de sesión
-2. **Sin autenticar**: Muestra botón para ir a Moodle (`/learning/login/`)
-3. **Después del login**: Usuario regresa y hace click en "Verificar Sesión"
-4. **Autenticado**: Widget muestra avatar, nombre, email y opción de logout
-5. **Logout**: Click en "Cerrar Sesión" cierra la sesión en el backend
+El `MoodleWidgetReact` permite integrar contenido de Moodle directamente en el frontend:
 
-### Implementación Técnica
+- **🖼️ Iframe inteligente**: Carga contenido de Moodle con autenticación sincronizada
+- **🔄 Estados contextuales**: Muestra diferentes UIs según el estado de autenticación
+- **📱 Responsive**: Se adapta a diferentes tamaños de pantalla
+- **🎯 Configurable**: Altura, título, descripción y URLs personalizables
 
-- **Frontend**: JavaScript integrado en `astro/src/pages/index.astro`
-- **API Integration**: Utiliza endpoints `/api/check-session` y `/api/logout`
-- **Responsive CSS**: Estilos adaptativos con gradientes y animaciones
-- **Error Handling**: Manejo robusto de errores con logs en consola
+**Ejemplo de uso**:
 
-### Beneficios UX
-
-- ✅ **Visibilidad clara** del estado de autenticación
-- ✅ **No hay redirecciones innecesarias** al verificar sesión
-- ✅ **Experiencia fluida** entre frontend y Moodle
-- ✅ **Información contextual** siempre visible
-- ✅ **Logout conveniente** sin perder contexto de navegación
-
-## 🔐 Sistema de Autenticación
-
-### Arquitectura de Autenticación
-
-La plataforma implementa un sistema de autenticación unificado que permite al frontend Astro verificar y utilizar las sesiones de Moodle:
-
-```text
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Auth Service  │    │   Moodle LMS    │
-│   (Astro)       │────│   (Node.js)     │────│   (PHP)         │
-│   Verificación  │    │   API REST      │    │   Autenticación │
-│   de sesiones   │    │   /api/*        │    │   /learning/*   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │   MariaDB       │
-                    │   mdl_sessions  │
-                    │   mdl_user      │
-                    └─────────────────┘
+```tsx
+<MoodleWidgetReact
+  src="http://localhost:4324/learning/mod/assign/view.php?id=2"
+  title="Actividades Destacadas"
+  description="Explora las tareas y actividades más recientes"
+  height="h-64 md:h-96"
+  showInHero={true}
+/>
 ```
 
-### Flujo de Autenticación
+## 📁 Estructura del Proyecto
 
-1. **Inicio de sesión**: El usuario se autentica en Moodle (`/learning/login/`)
-2. **Cookie de sesión**: Moodle genera una cookie `MoodleSession`
-3. **Verificación**: El frontend puede verificar la sesión via `/api/check-session`
-4. **Datos del usuario**: El frontend obtiene información del usuario via `/api/user`
-5. **Sincronización**: Ambas aplicaciones comparten el estado de autenticación
-
-### Configuración del Servicio de Autenticación
-
-El servicio de autenticación se configura mediante variables de entorno:
-
-```yaml
-# docker-compose.yml
-auth:
-  environment:
-    - DB_HOST=db
-    - DB_USER=moodle
-    - DB_PASS=moodle_pass
-    - DB_NAME=moodle
-    - DB_PORT=3306
+```text
+.
+├── astro/                    # 🎨 Frontend en Astro
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── MoodleWidgetReact.tsx     # Widget principal de contenido Moodle
+│   │   │   └── AuthWidgetReact.tsx       # Widget de autenticación (legacy)
+│   │   ├── pages/
+│   │   │   └── index.astro               # Página principal con widgets
+│   │   └── layouts/
+│   │       └── BaseLayout.astro          # Layout base responsive
+│   ├── package.json
+│   └── Dockerfile
+├── auth/                     # 🔐 Servicio de autenticación
+│   ├── server_new.js                     # API Node.js con validación CSRF
+│   ├── package.json
+│   └── Dockerfile
+├── nginx/                    # 🌐 Configuración del proxy
+│   └── nginx.conf                        # Enrutamiento y balanceo
+├── moodle-extra-config/      # ⚙️ Configuración personalizada de Moodle
+│   └── moodle_settings.php               # wwwroot y configuraciones proxy
+├── data/                     # 💾 Scripts SQL iniciales (opcional)
+├── logs/                     # 📋 Logs persistentes
+│   └── nginx/
+├── docker-compose.yml        # 🐳 Orquestación de contenedores
+└── README.md                # 📖 Documentación
 ```
 
 ## 🛠️ Desarrollo y Personalización
 
-### Modificar el Frontend (Astro)
+### Configuración de Desarrollo
+
+**Frontend (Astro):**
 
 ```bash
-# Entrar al directorio del frontend
 cd astro/
-
-# Instalar dependencias
 npm install
-
-# Desarrollo local
-npm run dev
-
-# Reconstruir contenedor
-docker compose build astro
+npm run dev  # Desarrollo local en puerto 3000
 ```
 
-### Modificar el Servicio de Autenticación
+**API de Autenticación:**
 
 ```bash
-# Entrar al directorio del servicio
 cd auth/
-
-# Instalar dependencias
 npm install
+npm start    # Requiere conexión a base de datos
+```
 
-# Desarrollo local (requiere base de datos)
-npm start
+**Reconstruir después de cambios:**
 
-# Reconstruir contenedor
+```bash
+# Reconstruir contenedor específico
+docker compose build astro
 docker compose build auth
+
+# Reiniciar servicios
+docker compose up -d
 ```
 
-### Logs y Debugging
+### Personalización de Widgets
 
-```bash
-# Ver logs de todos los servicios
-docker compose logs
+**MoodleWidgetReact** - Props disponibles:
 
-# Ver logs específicos
-docker compose logs astro
-docker compose logs auth
-docker compose logs moodle
-docker compose logs nginx
+- `src`: URL del contenido de Moodle a mostrar
+- `title`: Título del widget
+- `description`: Descripción del contenido
+- `height`: Clase CSS para altura (`h-64`, `h-96`, etc.)
+- `showInHero`: Mostrar en la sección hero
+- `fallbackMessage`: Mensaje cuando no hay autenticación
 
-# Seguir logs en tiempo real
-docker compose logs -f auth
+**Ejemplo de integración:**
+
+```tsx
+<MoodleWidgetReact
+  client:load
+  src="http://localhost:4324/learning/course/view.php?id=2"
+  title="Mi Curso"
+  description="Accede a tu curso favorito"
+  height="h-80"
+  showInHero={false}
+/>
 ```
 
-## 📊 Monitoreo y Mantenimiento
+## 📊 Monitoreo y Logging
 
-### Verificar Estado de Servicios
+### Verificar Estado del Sistema
 
 ```bash
-# Estado general de contenedores
+# Estado de todos los contenedores
 docker compose ps
 
-# Uso de recursos
+# Uso de recursos en tiempo real
 docker stats
 
-# Verificar conectividad de la API
+# Health check de la API
 curl http://localhost:4324/api/health
 
 # Verificar acceso a Moodle
 curl -I http://localhost:4324/learning/
 ```
 
-### Respaldos
+### Logs por Servicio
 
 ```bash
-# Respaldar base de datos
-docker compose exec db mysqldump -u moodle -pmoodle_pass moodle > backup_$(date +%Y%m%d).sql
+# Logs de autenticación
+docker compose logs auth
 
-# Respaldar datos de Moodle
-docker compose exec moodle tar -czf /backup/moodle_data_$(date +%Y%m%d).tar.gz /bitnami/moodle
+# Logs de Nginx (errores y acceso)
+docker compose logs nginx
+
+# Logs de Moodle
+docker compose logs moodle
+
+# Seguir logs en tiempo real
+docker compose logs -f auth nginx
 ```
 
-## 🔧 Solución de Problemas
+### Archivos de Log Persistentes
 
-### Problemas Comunes
+- **Nginx Access**: `./logs/nginx/access.log`
+- **Nginx Error**: `./logs/nginx/error.log`
+- **Contenedores**: `docker compose logs [servicio]`
 
-**Error: "Cannot connect to database"**
+## 🔧 Solución de Problemas Comunes
+
+### Error de Conexión a Base de Datos
+
 ```bash
-# Verificar que MariaDB esté corriendo
+# Verificar estado de MariaDB
 docker compose ps db
 
 # Revisar logs de la base de datos
 docker compose logs db
 
-# Reiniciar servicios
-docker compose restart db auth
+# Reiniciar servicios dependientes
+docker compose restart db auth moodle
 ```
 
-**Error: "API endpoints return 404"**
-```bash
-# Verificar configuración de Nginx
-docker compose logs nginx
+### Error de API (404/500)
 
+```bash
 # Verificar servicio de autenticación
 docker compose logs auth
+
+# Verificar configuración de Nginx
+docker compose logs nginx
 
 # Reconstruir contenedores
 docker compose build auth nginx
 docker compose up -d
 ```
 
-**Moodle no carga correctamente**
+### Moodle no Carga Correctamente
+
 ```bash
 # Verificar configuración de wwwroot
-docker compose logs moodle
+docker compose exec moodle cat /bitnami/moodle/conf/moodle_settings.php
 
 # Verificar proxy de Nginx
-curl -I http://localhost:4324/learning/
+curl -v http://localhost:4324/learning/
 
 # Limpiar caché y reiniciar
 docker compose restart moodle nginx
 ```
 
-### Logs Útiles
+## 🚀 Estado del Proyecto y Roadmap
+
+### ✅ Hito 3 - Completado
+
+- [x] **Autenticación real**: Validación completa con tokens CSRF contra Moodle
+- [x] **Widget de autenticación**: Interface visual en tiempo real
+- [x] **Widget de contenido**: Integración de contenido Moodle en frontend
+- [x] **API robusta**: Endpoints seguros para gestión de sesiones
+- [x] **Arquitectura escalable**: 6 contenedores Docker orquestados
+- [x] **UX optimizada**: Flujo de login sin redirecciones innecesarias
+- [x] **Seguridad mejorada**: Eliminación de bypasses peligrosos
+
+### � Próximas Mejoras (Roadmap)
+
+**Corto plazo:**
+- [ ] Configuración para diferentes entornos (dev/staging/prod)
+- [ ] Certificados SSL automáticos con Let's Encrypt
+- [ ] Backup automático de base de datos
+- [ ] Métricas y monitoreo avanzado
+
+**Mediano plazo:**
+- [ ] Autenticación SSO con proveedores externos (Google, Microsoft)
+- [ ] Sistema de notificaciones en tiempo real
+- [ ] Dashboard avanzado con analytics
+- [ ] PWA (Progressive Web App)
+
+**Largo plazo:**
+- [ ] Multitenancy para múltiples instituciones
+- [ ] API GraphQL complementaria
+- [ ] Integración con sistemas LTI externos
+- [ ] Mobile app nativa
+
+## 📄 Información Técnica
+
+### Tecnologías Utilizadas
+
+- **Frontend**: Astro 4.x + React 18 + TailwindCSS
+- **Backend**: Node.js 18+ + Express.js
+- **Base de datos**: MariaDB 10.11
+- **LMS**: Moodle 4.3.3 (Bitnami)
+- **Proxy**: Nginx Alpine
+- **Contenedores**: Docker + Docker Compose
+- **Administración**: Adminer para gestión de BD
+
+### Características de Seguridad
+
+- ✅ Autenticación real con validación CSRF
+- ✅ Sin hardcoded credentials en código
+- ✅ Cookies seguras y HTTPOnly
+- ✅ Headers de seguridad en Nginx
+- ✅ Aislamiento de red entre contenedores
+- ✅ Variables de entorno para credenciales
+
+### Rendimiento y Escalabilidad
+
+- ⚡ Frontend estático compilado (Astro)
+- ⚡ Proxy inverso con cache (Nginx)
+- ⚡ Conexiones persistentes a BD
+- ⚡ Lazy loading de componentes React
+- ⚡ Optimización de imágenes automática
+
+## 📞 Soporte y Contribuciones
+
+### Reportar Problemas
+
+Para soporte técnico, crear un issue incluyendo:
+
+- Descripción detallada del problema
+- Logs relevantes (`docker compose logs`)
+- Pasos para reproducir el error
+- Información del entorno (OS, Docker version)
+- Screenshots si es problema visual
+
+### Contribuir al Proyecto
+
+1. Fork del repositorio
+2. Crear branch para la feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit cambios (`git commit -am 'Add nueva funcionalidad'`)
+4. Push al branch (`git push origin feature/nueva-funcionalidad`)
+5. Crear Pull Request
+
+### Desarrollo Local
 
 ```bash
-# Logs de autenticación
-docker compose logs auth | grep "GET\|POST\|ERROR"
+# Clonar repositorio
+git clone <repository-url>
+cd astro-moodle
 
-# Logs de Nginx (errores)
-docker compose logs nginx | grep "error"
+# Levantar servicios
+docker compose up -d
 
-# Logs de acceso de Nginx
-docker compose exec nginx tail -f /var/log/nginx/access.log
+# Ver logs de desarrollo
+docker compose logs -f astro auth
 ```
 
-## 🚀 Próximos Pasos
+---
 
-### Hito 3 - Completado ✅
+**📧 Contacto**: Para consultas específicas, crear un issue en el repositorio del proyecto.
 
-- [x] Integración de autenticación entre Astro y Moodle
-- [x] API RESTful para gestión de sesiones
-- [x] Verificación de usuarios autenticados
-- [x] Sistema de logout unificado
-
-### Posibles Mejoras Futuras
-
-1. **Autenticación SSO**: Implementar Single Sign-On con proveedores externos
-2. **Roles y permisos**: Sistema granular de autorización
-3. **Notificaciones**: Sistema de notificaciones en tiempo real
-4. **Dashboard avanzado**: Panel de control con métricas y estadísticas
-5. **API GraphQL**: Migración o complemento con GraphQL
-6. **PWA**: Convertir el frontend en Progressive Web App
-7. **Multitenancy**: Soporte para múltiples instituciones
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
-## 👥 Contribuciones
-
-Las contribuciones son bienvenidas. Por favor, abrir un issue primero para discutir los cambios propuestos.
-
-## 📞 Soporte
-
-Para soporte técnico, crear un issue en el repositorio del proyecto con:
-- Descripción detallada del problema
-- Logs relevantes
-- Pasos para reproducir el error
-- Información del entorno (OS, Docker version, etc.)
+**📜 Licencia**: Este proyecto está bajo la Licencia MIT - ver `LICENSE` para detalles.
